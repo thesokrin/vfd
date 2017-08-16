@@ -1,0 +1,1 @@
+# Atlas Static Services Module
