@@ -1,0 +1,4 @@
+# hardcoded for now cause just cause - will be put in a default source file that should never
+# need to be touched...and probably auto-gen'd using fierce witchcraft
+team="isre"
+owner="matt.demery"
