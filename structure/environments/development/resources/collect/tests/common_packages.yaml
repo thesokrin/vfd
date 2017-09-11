@@ -1,0 +1,23 @@
+package:
+  grindr-ansible:
+    installed: true
+  grindr-ansible-base:
+    installed: true
+  grindr-ansible-limits:
+    installed: true
+  grindr-ansible-roles:
+    installed: true
+  grindr-ansible-sudo:
+    installed: true
+  grindr-ansible-users:
+    installed: true
+  grindr-base:
+    installed: true
+  grindr-efs-mounts:
+    installed: true
+  grindr-logging:
+    installed: true
+  grindr-repo-main:
+    installed: true
+  grindr-role-base:
+    installed: true

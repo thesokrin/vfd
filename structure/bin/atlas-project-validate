@@ -1,0 +1,272 @@
+#!/usr/bin/env python3
+# -*- encoding: utf-8 -*-
+
+# Atlas BOFH Bot
+
+import argparse
+import os
+import subprocess
+import sys
+
+from pathlib import Path
+
+pass_char="✔"
+fail_char="✖"
+
+ansi_clear="\033[0m"
+ansi_red  ="\033[1;31m"
+ansi_green="\033[1;32m"
+
+devnull = open(os.devnull, 'wb')
+
+class RuleResult(object):
+
+    def __init__(self, name, success, error_message=None):
+        self.name = name
+        self.success = success
+        self.error_message = error_message
+
+
+class TestResult(object):
+
+    def __init__(self, failures, results):
+        self.failures = failures
+        self.results = results
+
+    @property
+    def success(self):
+        return self.failures == 0
+
+
+class AtlasBase(object):
+
+    def __init__(self, path):
+        self.path = path
+        self.rules = [
+            self.rule_has_readme,
+            self.rule_has_main,
+            self.rule_has_variables,
+            self.rule_has_outputs,
+            self.rule_passes_terraform_get,
+            self.rule_is_valid_terraform,
+        ]
+
+    def test(self):
+        """Execute tests against this Atlas Project."""
+        failures = 0
+        results = []
+
+        for rule in self.rules:
+            results.append(rule())
+            if not results[-1].success:
+                failures = failures + 1
+
+        return TestResult(failures, results)
+
+    def rule_has_main(self):
+        """Every Atlas Project must have a main.tf file."""
+        if not self.path.joinpath("main.tf").is_file():
+            return RuleResult("has_main", False, "Project does not have main.tf.")
+
+        return RuleResult("has_main", True)
+
+    def rule_has_outputs(self):
+        """Every Atlas Project must have an outputs.tf file."""
+        if not self.path.joinpath("outputs.tf").is_file():
+            return RuleResult("has_outputs", False, "Project does not have outputs.tf.")
+
+        return RuleResult("has_outputs", True)
+
+    def rule_has_variables(self):
+        """Every Atlas Project must have a variables.tf file."""
+        if not self.path.joinpath("variables.tf").is_file():
+            return RuleResult("has_variables", False, "Project does not have variables.tf.")
+
+        return RuleResult("has_variables", True)
+
+    def rule_has_readme(self):
+        """Every Atlas Project must have a README.md."""
+        if not self.path.joinpath("README.md").is_file():
+            return RuleResult("has_readme", False, "Project does not have README.md.")
+
+        return RuleResult("has_readme", True)
+
+    def rule_passes_terraform_get(self):
+        """Every Atlas Project must be able to get its Terraform modules."""
+        if subprocess.call(["terraform", "get", "."], cwd=str(self.path), stdout=devnull, stderr=devnull) !=0:
+            return RuleResult("passes_terraform_get", False,
+                "Project failed `terraform get`; check module import locations.")
+
+        return RuleResult("passes_terraform_get", True)
+
+    def rule_is_valid_terraform(self):
+        """Every Atlas Project must pass Terraform validate."""
+        if subprocess.call(["terraform", "validate", str(self.path)], stdout=devnull, stderr=devnull) != 0:
+            return RuleResult("is_valid_terraform", False, "Project failed `terraform validate`.")
+
+        return RuleResult("is_valid_terraform", True)
+
+
+class AtlasProject(AtlasBase):
+
+    def __init__(self, path):
+        super(AtlasProject, self).__init__(path)
+        self.rules = [
+            self.rule_has_readme,
+            self.rule_has_main,
+            self.rule_has_makefile,
+            self.rule_has_variables,
+            self.rule_has_tfvars,
+            self.rule_has_outputs,
+            self.rule_is_valid_terraform,
+        ]
+
+    def rule_has_makefile(self):
+        """Every Atlas Project must have a Makefile."""
+        if not self.path.joinpath("Makefile").is_file():
+            return RuleResult("has_makefile", False, "Project does not have a Makefile.")
+
+        return RuleResult("has_makefile", True)
+
+    def rule_has_tfvars(self):
+        """Every Atlas Project must have a terraform.tfvars file."""
+        if not self.path.joinpath("terraform.tfvars").is_file():
+            return RuleResult("has_tfvars", False, "Project does not have terraform.tfvars.")
+
+        return RuleResult("has_tfvars", True)
+
+
+
+class AtlasInfrastructureProject(AtlasProject):
+    pass
+
+
+class AtlasModuleProject(AtlasBase):
+    pass
+
+class AtlasAccountProject(AtlasProject):
+    pass
+
+def main():
+    parser = argparse.ArgumentParser(prog="atlas-project-validate",
+        description="Validates that Atlas Projects conform to a set of rules.")
+    parser.add_argument('basedir', default='.', nargs='?', help="Base directory of the Atlas repository.")
+    args = parser.parse_args()
+
+    # find all atlas project directories
+    atlas_projects = get_atlas_toplevel_projects(args.basedir) + \
+        get_atlas_account_projects(args.basedir) + \
+        get_atlas_stack_projects(args.basedir) + \
+        get_atlas_module_projects(args.basedir)
+
+    # for every atlas project, execute tests
+    failed_projects = 0
+
+    for atlas_project in atlas_projects:
+        result = atlas_project.test()
+
+        if result.success:
+            log_success("{mark} {path} passed all tests.", mark=pass_char, path=atlas_project.path)
+        else:
+            failed_projects += 1
+            log_error("{mark} {path} has {failures} failed test(s):", mark=fail_char, path=atlas_project.path,
+                failures=result.failures)
+
+        for test_result in filter(lambda r: not r.success, result.results):
+            print("  - {name}: {message}".format(name=test_result.name, message=test_result.error_message))
+
+        # introduce newline after every failed project and the last one
+        if not result.success or atlas_project == atlas_projects[-1]:
+            print()
+
+    if failed_projects > 0:
+        log_error("{} Atlas Project(s) have failed tests.".format(failed_projects))
+        sys.exit(1)
+    else:
+        log_success("All Atlas Projects have passed tests.")
+
+
+def get_atlas_toplevel_projects(basedir):
+    """Returns a list of AtlasProject instances representing top-level Atlas Projects in the resources/ directory."""
+    atlas_projects = []
+
+    s3_projects = [p for p in Path(basedir, 'resources').joinpath('s3').glob('*') if p.is_dir()]
+    other_projects = [p for p in Path(basedir, 'resources').glob('*') if p.is_dir() and not p.name in ('s3','accounts')]
+
+    for project in sorted(s3_projects + other_projects):
+        atlas_projects.append(AtlasInfrastructureProject(project))
+
+    return atlas_projects
+
+def get_atlas_account_projects(basedir):
+    """Returns a list of AtlasProject instances representing account only Atlas Projects in the resources/accounts directory."""
+    atlas_account_projects = []
+    account_dirs = [p for p in Path(basedir, 'resources/accounts').glob('*') if p.is_dir()]
+    account_projects = [p for t in account_dirs for p in Path(t).glob('*') if p.is_dir()]
+
+    for project in sorted(account_projects):
+        atlas_account_projects.append(AtlasAccountProject(project))
+
+    return atlas_account_projects
+
+def get_atlas_stack_projects(basedir):
+    """Returns a list of AtlasProject instances representing projects in environments/ and hubs/."""
+    atlas_projects = []
+
+    atlas_environment_paths = [p for p in Path(basedir, 'environments').glob('*') if p.is_dir()]
+    atlas_hub_paths = [p for p in Path(basedir, 'hubs').glob('*') if p.is_dir()]
+
+    for stack in sorted(atlas_environment_paths + atlas_hub_paths):
+        # atlas infrastructure resources
+        if stack.joinpath('atlas').is_dir():
+            atlas_projects.append(AtlasInfrastructureProject(stack.joinpath('atlas')))
+        else:
+            # FIXME should freak out if there's no atlas project
+            pass
+
+        # first level resources
+        for project in [i for i in stack.glob('*') if i.is_dir() and not i.name in ['atlas', 'resources', 'include.d']]:
+            atlas_projects.append(AtlasProject(project))
+
+        # second-level resources
+        for project in [i for i in stack.joinpath('resources').glob('*') if i.is_dir()]:
+            atlas_projects.append(AtlasProject(project))
+
+    return atlas_projects
+
+
+def get_atlas_module_projects(basedir):
+    """Returns a list of AtlasProject instances representing modules in the modules/ and macros/ directories."""
+    atlas_projects = []
+
+    atlas_macro_paths = [p for p in Path(basedir, 'macros').glob('*') if p.is_dir()]
+    atlas_module_paths = [p for p in Path(basedir, 'modules').glob('*') if p.is_dir()]
+
+    for module in sorted(atlas_macro_paths + atlas_module_paths):
+        atlas_projects.append(AtlasModuleProject(module))
+
+    return atlas_projects
+
+
+def is_color():
+    return sys.stdout.isatty()
+
+
+def log_success(message, *args, **kwargs):
+    print("{start}{message}{end}".format(
+        message=message,
+        start='' if not is_color() else ansi_green,
+        end='' if not is_color() else ansi_clear
+    ).format(*args, **kwargs))
+
+
+def log_error(message, *args, **kwargs):
+    print("{start}{message}{end}".format(
+        message=message,
+        start='' if not is_color() else ansi_red,
+        end='' if not is_color() else ansi_clear
+    ).format(*args, **kwargs))
+
+
+if __name__ == "__main__":
+    main()

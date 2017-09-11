@@ -1,0 +1,129 @@
+# Greyskull
+Host greyskull.dev.grindr.io
+  StrictHostKeyChecking no
+  UserKnownHostsFile /dev/null
+  ForwardAgent yes
+  ServerAliveInterval 60
+  TCPKeepAlive yes
+  User isre
+  IdentityFile ~/.ssh/id_rsa
+
+Host *.dev.grindr.io
+  ForwardAgent yes
+  StrictHostKeyChecking no
+  ServerAliveInterval 60
+  TCPKeepAlive yes
+  ProxyCommand ssh -q -o StrictHostKeyChecking=no -A isre@spinaltap-dev.grindr.io nc -w90 -q0 %h %p 2> /dev/null
+  ControlMaster auto
+  ControlPath ~/.ssh/mux-%r@%h:%p
+  ControlPersist 8h
+  User isre
+  IdentityFile ~/.ssh/id_rsa
+
+Host 10.50.*.*
+  ForwardAgent yes
+  StrictHostKeyChecking no
+  ServerAliveInterval 60
+  TCPKeepAlive yes
+  ProxyCommand ssh -q -o StrictHostKeyChecking=no -A isre@spinaltap-dev.grindr.io nc -w90 -q0 %h %p 2> /dev/null
+  ControlMaster auto
+  ControlPath ~/.ssh/mux-%r@%h:%p
+  ControlPersist 8h
+  User isre
+  IdentityFile ~/.ssh/id_rsa
+
+Host *.stg.grindr.io
+  ForwardAgent yes
+  StrictHostKeyChecking no
+  ServerAliveInterval 60
+  TCPKeepAlive yes
+  ProxyCommand ssh -q -o StrictHostKeyChecking=no -A isre@spinaltap-stg.grindr.io nc -w90 -q0 %h %p 2> /dev/null
+  ControlMaster auto
+  ControlPath ~/.ssh/mux-%r@%h:%p
+  ControlPersist 8h
+  User isre
+  IdentityFile ~/.ssh/id_rsa
+
+Host 10.51.*.*
+  ForwardAgent yes
+  StrictHostKeyChecking no
+  ServerAliveInterval 60
+  TCPKeepAlive yes
+  ProxyCommand ssh -q -o StrictHostKeyChecking=no -A isre@spinaltap-stg.grindr.io nc -w90 -q0 %h %p 2> /dev/null
+  ControlMaster auto
+  ControlPath ~/.ssh/mux-%r@%h:%p
+  ControlPersist 8h
+  User isre
+  IdentityFile ~/.ssh/id_rsa
+
+Host *.dsci.grindr.io
+  ForwardAgent yes
+  StrictHostKeyChecking no
+  ServerAliveInterval 60
+  TCPKeepAlive yes
+  ProxyCommand ssh -q -o StrictHostKeyChecking=no -A isre@spinaltap-dsci.grindr.io nc -w90 -q0 %h %p 2> /dev/null
+  ControlMaster auto
+  ControlPath ~/.ssh/mux-%r@%h:%p
+  ControlPersist 8h
+  User isre
+  IdentityFile ~/.ssh/id_rsa
+
+Host 10.100.*.*
+  ForwardAgent yes
+  StrictHostKeyChecking no
+  ServerAliveInterval 60
+  TCPKeepAlive yes
+  ProxyCommand ssh -q -o StrictHostKeyChecking=no -A isre@spinaltap-dsci.grindr.io nc -w90 -q0 %h %p 2> /dev/null
+  ControlMaster auto
+  ControlPath ~/.ssh/mux-%r@%h:%p
+  ControlPersist 8h
+  User isre
+  IdentityFile ~/.ssh/id_rsa
+
+Host *.hub.grindr.io
+  ForwardAgent yes
+  StrictHostKeyChecking no
+  ServerAliveInterval 60
+  TCPKeepAlive yes
+  ProxyCommand ssh -q -o StrictHostKeyChecking=no -A isre@spinaltap-hub.grindr.io nc -w90 -q0 %h %p 2> /dev/null
+  ControlMaster auto
+  ControlPath ~/.ssh/mux-%r@%h:%p
+  ControlPersist 8h
+  User isre
+  IdentityFile ~/.ssh/id_rsa
+
+Host 10.10.*.*
+  ForwardAgent yes
+  StrictHostKeyChecking no
+  ServerAliveInterval 60
+  TCPKeepAlive yes
+  ProxyCommand ssh -q -o StrictHostKeyChecking=no -A isre@spinaltap-hub.grindr.io nc -w90 -q0 %h %p 2> /dev/null
+  ControlMaster auto
+  ControlPath ~/.ssh/mux-%r@%h:%p
+  ControlPersist 8h
+  User isre
+  IdentityFile ~/.ssh/id_rsa
+
+Host *.prod.grindr.io
+  ForwardAgent yes
+  StrictHostKeyChecking no
+  ServerAliveInterval 60
+  TCPKeepAlive yes
+  ProxyCommand ssh -q -o StrictHostKeyChecking=no -A isre@spinaltap-prod.grindr.io nc -w90 -q0 %h %p 2> /dev/null
+  ControlMaster auto
+  ControlPath ~/.ssh/mux-%r@%h:%p
+  ControlPersist 8h
+  User isre
+  IdentityFile ~/.ssh/id_rsa
+
+Host 10.2.*.*
+  ForwardAgent yes
+  StrictHostKeyChecking no
+  ServerAliveInterval 60
+  TCPKeepAlive yes
+  ProxyCommand ssh -q -o StrictHostKeyChecking=no -A isre@spinaltap-prod.grindr.io nc -w90 -q0 %h %p 2> /dev/null
+  ControlMaster auto
+  ControlPath ~/.ssh/mux-%r@%h:%p
+  ControlPersist 8h
+  User isre
+  IdentityFile ~/.ssh/id_rsa

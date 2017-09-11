@@ -1,0 +1,36 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+           "Sid": "AllowAptS3iamGetUser",
+           "Effect": "Allow",
+           "Action": [
+               "iam:GetUser"
+           ],
+           "Resource": [
+             "arn:aws:iam::284224159432:user/${aws:username}"
+           ]
+       },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:ListBucket"
+            ],
+            "Resource": [
+                "arn:aws:s3:::apt.grindr.io"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:PutObject",
+                "s3:GetObject",
+                "s3:ListObjects",
+                "s3:DeleteObject"
+            ],
+            "Resource": [
+                "arn:aws:s3:::apt.grindr.io/*"
+            ]
+        }
+    ]
+}

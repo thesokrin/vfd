@@ -1,0 +1,66 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+from __future__ import print_function
+
+import argparse
+import json
+import sys
+
+string_types = (str,) if sys.version_info[0] == 3 else (basestring,)
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Parse a Terraform state file into usable JSON.")
+    parser.add_argument("state_file", type=argparse.FileType('r'), help="The terraform.tfstate file to parse.")
+    args = parser.parse_args()
+
+    try:
+        state = json.load(args.state_file)
+    except:
+        error("Unable to parse Terraform state file.")
+
+    module_names = get_module_names(state)
+    root_outputs = get_module_outputs('root', state.get('modules'))
+
+    if len(root_outputs.get('exported_modules', [])) > 0:
+        root_outputs['modules'] = {}
+
+    exported_module_names = map(lambda a: 'root.{}'.format(a), root_outputs.get('exported_modules', []))
+
+    # for now it's kind of a cop-out, but I'm sick; only export explicitly exported modules
+    for module_name in [m for m in exported_module_names if m in module_names]:
+        root_outputs.get('modules')[module_name.split('.')[-1]] = get_module_outputs(module_name, state.get('modules'))
+
+
+    print(json.dumps(root_outputs, indent=2, sort_keys=True))
+
+
+def get_module_names(state):
+    """Gets all modules names defined in a given state file."""
+    return list(map(lambda i: '.'.join(i.get('path')), state.get('modules')))
+
+
+def get_module_outputs(path, modules):
+    """Gets a module's outputs by its path in the given modules list."""
+    # if it's a dot delimited string, convert it to an array
+    if isinstance(path, string_types):
+        path = path.split('.')
+
+    modules = filter(lambda i: i.get('path') == path, modules)
+
+    if len(modules) == 0:
+        return {}
+    else:
+        return { k: v.get('value') for k, v in modules[0].get('outputs').items() }
+
+
+def error(message, rc=1):
+    """Print an error message to stderr and exit."""
+    sys.stderr.write("{}\n".format(message))
+    sys.stderr.flush()
+    sys.exit(rc)
+
+
+if __name__ == "__main__":
+    main()

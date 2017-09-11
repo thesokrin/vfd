@@ -22,7 +22,8 @@ resource "aws_security_group" "default" {
     cidr_blocks = ["${concat(
        var.layer_admin_cidr_blocks,
        var.layer_data_cidr_blocks,
-       var.layer_services_cidr_blocks
+       var.layer_services_cidr_blocks,
+       var.additional_http_transport_cidr_blocks
      )}"]
   }
 
@@ -32,10 +33,22 @@ resource "aws_security_group" "default" {
     from_port = 9300
     to_port = 9300
     cidr_blocks = ["${concat(
-       var.layer_admin_cidr_blocks,
-       var.layer_data_cidr_blocks,
-       var.layer_services_cidr_blocks
-     )}"]
+      list(var.cidr_block),
+      var.layer_admin_cidr_blocks,
+      var.layer_data_cidr_blocks,
+      var.layer_services_cidr_blocks,
+      var.additional_tcp_transport_cidr_blocks
+    )}"]
+  }
+
+  # cerebro
+  ingress {
+    protocol = "tcp"
+    from_port = 9000
+    to_port = 9000
+    cidr_blocks = ["${concat(
+      var.layer_data_cidr_blocks
+    )}"]
   }
 
   # egress to anywhere
@@ -75,7 +88,8 @@ resource "aws_security_group" "elb" {
     cidr_blocks = ["${concat(
       var.layer_admin_cidr_blocks,
       var.layer_data_cidr_blocks,
-      var.layer_services_cidr_blocks
+      var.layer_services_cidr_blocks,
+      var.additional_http_transport_cidr_blocks
     )}"]
   }
 
@@ -87,7 +101,18 @@ resource "aws_security_group" "elb" {
     cidr_blocks = ["${concat(
       var.layer_admin_cidr_blocks,
       var.layer_data_cidr_blocks,
-      var.layer_services_cidr_blocks
+      var.layer_services_cidr_blocks,
+      var.additional_tcp_transport_cidr_blocks
+    )}"]
+  }
+
+  # cerebro
+  ingress {
+    protocol = "tcp"
+    from_port = 80
+    to_port = 9000
+    cidr_blocks = ["${concat(
+       var.layer_public_cidr_blocks
     )}"]
   }
 

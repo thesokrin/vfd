@@ -1,0 +1,6 @@
+---
+  - hosts: all
+    roles:
+      - role: terraform
+        terraform_install_root: "{{ ansible_env.HOME }}/terraform/"
+        bin_dir: "{{ ansible_env.HOME }}/.local/bin"

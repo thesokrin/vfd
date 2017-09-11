@@ -9,6 +9,11 @@ resource "aws_iam_group_policy_attachment" "godlike" {
   policy_arn = "${aws_iam_policy.godlike.arn}"
 }
 
+resource "aws_iam_group" "authenticity" {
+  name = "atlas_authenticity_team_group"
+  path = "/teams/"
+}
+
 resource "aws_iam_group" "isre" {
   name = "atlas_isre_team_group"
   path = "/teams/"

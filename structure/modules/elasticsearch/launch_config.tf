@@ -32,4 +32,15 @@ resource "aws_launch_configuration" "default" {
   lifecycle {
     create_before_destroy = true
   }
+
+  # only support up to 2 drives
+  ephemeral_block_device {
+    device_name = "/dev/xvdb"
+    virtual_name = "ephemeral0"
+  }
+
+  ephemeral_block_device {
+    device_name = "/dev/xvdc"
+    virtual_name = "ephemeral1"
+  }
 }

@@ -1,0 +1,23 @@
+---
+ # install grindr-goss
+ - name: install grindr-goss
+   package: name=grindr-goss state=latest
+
+ # deploy test cases
+ - name: deploy tests
+   copy: src={{ item }} dest=/tmp/degoss/
+   with_items: "{{ tests }}"
+
+ # run the tests
+ - name: run tests
+   shell: /grindr/bin/goss -g /tmp/degoss/tests/goss.yaml v --format rspecish
+   register: goss
+
+ - debug: msg="{{ goss.stdout_lines }}"
+
+ - name: clean /tmp/degoss files
+   file: path=/tmp/degoss state=absent
+
+ # remove grindr-goss
+ - name: remove grindr-goss
+   package: name=grindr-goss state=absent
