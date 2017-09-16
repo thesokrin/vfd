@@ -10,7 +10,7 @@ resource "aws_elb" "default" {
 
   cross_zone_load_balancing = true
 
-  subnets = ["${data.terraform_remote_state.environment.layer_services_subnet_ids}"]
+  subnets = ["${var.subnet == "unset" ? data.terraform_remote_state.environment.layer_services_subnet_ids : var.subnet}"]
 
   security_groups = ["${aws_security_group.loadbalancer.id}"]
 

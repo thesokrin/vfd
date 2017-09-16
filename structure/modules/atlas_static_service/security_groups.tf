@@ -3,7 +3,7 @@
 resource "aws_security_group" "default" {
   name        = "${var.name}.${data.terraform_remote_state.environment.zone}"
   description = "Security group for Static Services (${var.name}) instances in the ${data.terraform_remote_state.environment.env_name_fancy}."
-  vpc_id      = "${data.terraform_remote_state.environment.vpc_id}"
+  vpc_id      = "${var.vpc == "tfstate" ? data.terraform_remote_state.environment.vpc_id : var.vpc}"
 
   # ssh
   ingress {
@@ -15,6 +15,7 @@ resource "aws_security_group" "default" {
       list(data.terraform_remote_state.environment.cidr_block),
       list(data.terraform_remote_state.hub.cidr_block),
       list(data.terraform_remote_state.hub.vpn_cidr_block),
+      var.cidr
     ))}"]
   }
 
@@ -60,7 +61,7 @@ resource "aws_security_group" "loadbalancer" {
   count       = "${var.create_elb}"
   name        = "${var.name}-elb.${data.terraform_remote_state.environment.zone}"
   description = "Security group for the ${var.project_name} load balancer in the ${data.terraform_remote_state.environment.env_name}."
-  vpc_id      = "${data.terraform_remote_state.environment.vpc_id}"
+  vpc_id      = "${var.vpc == "tfstate" ? data.terraform_remote_state.environment.vpc_id : var.vpc}"
 
   # http
   ingress {
@@ -72,7 +73,7 @@ resource "aws_security_group" "loadbalancer" {
       data.terraform_remote_state.environment.layer_public_cidr_blocks,
       data.terraform_remote_state.environment.layer_services_cidr_blocks,
       data.terraform_remote_state.environment.layer_admin_cidr_blocks,
-      data.terraform_remote_state.hub.layer_admin_cidr_blocks,
+      data.terraform_remote_state.hub.layer_admin_cidr_blocks
     )}"]
   }
 

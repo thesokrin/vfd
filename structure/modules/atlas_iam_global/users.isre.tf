@@ -30,6 +30,12 @@ resource "aws_iam_user" "rosalba" {
   force_destroy = true
 }
 
+resource "aws_iam_user" "shelby" {
+  name = "shelby.spees"
+  path = "/teams/isre/"
+  force_destroy = true
+}
+
 resource "aws_iam_user" "slava" {
   name = "slava.maslennikov"
   path = "/teams/isre/"
@@ -45,8 +51,9 @@ resource "aws_iam_group_membership" "isre_godlike" {
     "${aws_iam_user.joshua.name}",
     "${aws_iam_user.matt.name}",
     "${aws_iam_user.naftuli.name}",
-    "${aws_iam_user.slava.name}",
-    "${aws_iam_user.rosalba.name}"
+    "${aws_iam_user.rosalba.name}",
+    "${aws_iam_user.shelby.name}",
+    "${aws_iam_user.slava.name}"
   ]
 }
 
@@ -58,7 +65,8 @@ resource "aws_iam_group_membership" "isre_team" {
     "${aws_iam_user.joshua.name}",
     "${aws_iam_user.matt.name}",
     "${aws_iam_user.naftuli.name}",
-    "${aws_iam_user.slava.name}",
-    "${aws_iam_user.rosalba.name}"
+    "${aws_iam_user.rosalba.name}",
+    "${aws_iam_user.shelby.name}",
+    "${aws_iam_user.slava.name}"
   ]
 }

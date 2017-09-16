@@ -10,6 +10,8 @@ data "template_file" "xa_godlike_assume_role" {
       formatlist("arn:aws:iam::%s:user/teams/isre/%s", values(var.aws_account_ids), "${aws_iam_user.joshua.name}"),
       formatlist("arn:aws:iam::%s:user/teams/isre/%s", values(var.aws_account_ids), "${aws_iam_user.matt.name}"),
       formatlist("arn:aws:iam::%s:user/teams/isre/%s", values(var.aws_account_ids), "${aws_iam_user.naftuli.name}"),
+      formatlist("arn:aws:iam::%s:user/teams/isre/%s", values(var.aws_account_ids), "${aws_iam_user.rosalba.name}"),
+      formatlist("arn:aws:iam::%s:user/teams/isre/%s", values(var.aws_account_ids), "${aws_iam_user.shelby.name}"),
       formatlist("arn:aws:iam::%s:user/teams/isre/%s", values(var.aws_account_ids), "${aws_iam_user.slava.name}")
     ))}"
   }

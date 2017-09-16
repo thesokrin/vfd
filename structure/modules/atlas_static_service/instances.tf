@@ -18,9 +18,9 @@ resource "aws_instance" "default" {
   ami                  = "${var.ami_id}"
   instance_type        = "${var.ec2_instance_type}"
   iam_instance_profile = "${aws_iam_instance_profile.default.name}"
-  subnet_id            = "${data.terraform_remote_state.environment.layer_services_subnet_ids[
+  subnet_id            = "${var.subnet == "unset" ? data.terraform_remote_state.environment.layer_services_subnet_ids[
     count.index % length(data.terraform_remote_state.environment.layer_services_subnet_ids)
-  ]}"
+  ] : var.subnet}"
   key_name             = "${var.ec2_key_name}"
 
   user_data = "${element(data.template_file.cloudinit.*.rendered, count.index)}"

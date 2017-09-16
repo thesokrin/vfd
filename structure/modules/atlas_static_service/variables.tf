@@ -254,3 +254,27 @@ variable "sg_instance_to_port" {
     Port to end allowing to instance.
   EOF
 }
+
+variable "vpc" {
+  default = "tfstate"
+
+  description = <<-EOF
+    VPC ID - if not set, use "${data.terraform_remote_state.environment.vpc_id}"
+  EOF
+}
+
+variable "subnet" {
+  default = "unset"
+
+  description = <<-EOF
+    Subnet - if unset will use that of atlas.
+  EOF
+}
+
+variable "cidr" {
+  default = [ ]
+
+  description = <<-EOF
+    CIDR that should be allowed in the security group - if unset will use that of atlas.
+  EOF
+}

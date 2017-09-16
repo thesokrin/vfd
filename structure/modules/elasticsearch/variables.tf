@@ -142,6 +142,30 @@ variable "layer_services_cidr_blocks" {
   EOF
 }
 
+variable "layer_public_cidr_blocks" {
+  type = "list"
+
+  description = <<-EOF
+    A list of the three CIDR blocks for the Atlas Public Layer.
+  EOF
+}
+
+variable "additional_http_transport_cidr_blocks" {
+  type = "list"
+
+  description = <<-EOF
+    A list of the CIDR blocks to access the http transport port (9200).
+  EOF
+}
+
+variable "additional_tcp_transport_cidr_blocks" {
+  type = "list"
+
+  description = <<-EOF
+    A list of the CIDR blocks to access the tcp transport port (9300).
+  EOF
+}
+
 variable "private_zone_id" {
   description = <<-EOF
     The private zone id of the internal DNS hosted zone.

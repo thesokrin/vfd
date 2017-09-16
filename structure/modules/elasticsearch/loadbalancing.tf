@@ -36,6 +36,14 @@ resource "aws_elb" "default" {
     instance_port = 9300
   }
 
+  # cerebro
+  listener {
+    lb_protocol = "HTTP"
+    lb_port = 80
+    instance_protocol = "HTTP"
+    instance_port = 9000
+  }
+
   tags {
     Name = "${var.name}.${var.zone}"
     # atlas variables

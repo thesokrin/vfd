@@ -1,5 +1,0 @@
-production,prod,Atlas Production Environment
-staging,stg,Atlas Staging Environment
-development,develop,Atlas Development Environment
-datascience,dsci,Atlas Data Science Environment
-hub,hub,Atlas Hub Environment

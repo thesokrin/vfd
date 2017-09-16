@@ -12,19 +12,31 @@ function sourceFile() {
 	fi;
 }
 
-while getopts ":a:" opt; do
+while getopts "n:d:e:l:a:h" opt; do
   case $opt in
-		a)
-      echo "-a was triggered, Parameter: $OPTARG" >&2
+		n)
+			echo "fancy name: $OPTARG" >&2
+			fname=$OPTARG
       ;;
-		b)
-      echo "-a was triggered, Parameter: $OPTARG" >&2
-    ;;
-		c)
-      echo "-a was triggered, Parameter: $OPTARG" >&2
-    ;;
 		d)
-      echo "-a was triggered, Parameter: $OPTARG" >&2
+			echo "description: $OPTARG" >&2
+			description=$OPTARG
+    ;;
+		e)
+			echo "environment: $OPTARG" >&2
+			environment=$OPTARG
+    ;;
+		l)
+			echo "layer: $OPTARG" >&2
+			layer=$OPTARG
+    ;;
+		a)
+			echo "account: $OPTARG" >&2
+			account=$OPTARG
+    ;;
+		h)
+			echo "-n fancyname -d description -e environment -l layer -a account";
+			exit 0
     ;;
     \?)
       echo "Invalid option: -$OPTARG" >&2
@@ -37,35 +49,30 @@ while getopts ":a:" opt; do
   esac
 done
 
-exit 0
-
-if [[ "x$1" == "xhelp" || ! $1 ]]; then
-	echo "fancyname description environment layer account";
-	exit 0
-fi
+#exit 0
 
 # futurey sourcey cleanupy stuffs
 sourceFile "config.defaults" || echo "Defaults file config.defaults is NOT found. "#default variables on a per-creator basis
 sourceFile "core.defaults" || echo "Defaults file config.defaults is NOT found. "#default variables on a per-creator basis
 
 # set variables. we're down to 5 inputs required at default. yaa!
-fname=$1
+#fname=$1
 #name = $(echo $fname | sed 's/'s/\(.*\)/\L\1/'| sed 's/[^a-zA-Z0-9]//g'); fi
 if [[ ! $name ]]; then
 	name=$(echo $fname | perl -pe 'y/[A-Z]/[a-z]/' | sed 's/[^a-zA-Z0-9]//g')
 fi
 sourceFile "${name}.project" || echo "Project file for $name not found." #file full of everything needed to spin up anything ever that isn't included in the defaults
-description=$2
-environment=$3
-layer=$4
-account=$5
+#description=$2
+#environment=$3
+#layer=$4
+#account=$5
 
 # auto-determined values (there's no such thing as MAGIC)
 # do a little logic (break a sweat with that elbow grease)
-account_id="$(cat accounts.map | grep $account | cut -d',' -f3)"
-account_description="$(cat accounts.map | grep $account | cut -d',' -f2)"
-environment_fancy="$(cat environments.map | grep $environment | cut -d',' -f2)"
-environment_description="$(cat environments.map | grep $environment | cut -d',' -f3)"
+account_id="$(cat account.map | grep $account | cut -d',' -f3)"
+account_description="$(cat account.map | grep $account | cut -d',' -f2)"
+environment_fancy="$(cat environment.map | grep $environment | cut -d',' -f2)"
+environment_description="$(cat environment.map | grep $environment | cut -d',' -f3)"
 
 # reset the spanish inquisition state
 ask_instances='0'
@@ -76,7 +83,7 @@ ask_modules='0'
 
 
 # purely static variables-ish
-modules='atlas_static_module' # soon to be 'atlas_defaults' and then if REQUIRED you can EASILY tack on any other module
+modules='atlas_static_service' # soon to be 'atlas_defaults' and then if REQUIRED you can EASILY tack on any other module
 
 # make it so it will auto-gen the resources files around the module-required definitions auto-gen'd from grepping/sed'ing the module
 # files. possibly future, interactive-repair during checks. no need to edit,save,plan... . just edit, plan, improvise, done
@@ -85,15 +92,40 @@ modules='atlas_static_module' # soon to be 'atlas_defaults' and then if REQUIRED
 # eventually flip through an array of modules listed (do modules require anything extra?)
 # if moduledir doesn't exist then ask_modules=1
 if [[ -e "structure/modules/$modules/" ]]; then
-	echo "Module exists!"
+	echo "Module "$modules" exists!"
 	ask_modules='0'
 else
-	echo "Module hasn't been existed yet!"
+	echo "Module "$modules" hasn't been existed yet!"
 	ask_modules='1'
 fi
 # if remote state isn't defined then use the atlas remote state - in future you can specify multiple remote states,
 # each assigned to it's short name
 remotestate="atlas"
+
+alias en='echo -n'
+
+echo ""
+echo "variables:"
+en "Fancy name: "; checkvar fname
+echo "Short name: "$name
+echo "Description: "$description
+echo "Type: "$type
+echo "Team: "$team
+echo "Owner: "$owner
+echo -n "Environment: "; checkVar environment
+echo -n "Remote state: "; checkVar remotestate
+echo "Account: "$account
+echo "Account Description: "$account_description
+echo "Account ID: "$account_id
+echo "Modules: "$modules
+echo "end variables"
+echo ""
+# populate the basic templates (eventually source a global variables.tf file instead of things flying willy-nilly)
+# woah there, exiting now cause debug!!
+exit 0
+
+
+
 
 # prepare directory structure
 cd ~/vfd/structure
@@ -104,29 +136,22 @@ else
 fi
 
 echo "Resource destination location: "$newdir
-mkdir -p $newdir
-cd $newdir
+mkdir -p $newdir || exit 1
+cd $newdir || exit 1
 cp -r ~/vfd/resource/* .
 pwd
 
-echo ""
-echo "variables:"
-echo $fname
-echo $name
-echo $description
-echo $type
-echo $team
-echo $owner
-echo $environment
-echo $remotestate
-echo $account
-echo $account_description
-echo $account_id
-echo "end variables"
-echo ""
-# populate the basic templates (eventually source a global variables.tf file instead of things flying willy-nilly)
-# woah there, exiting now cause debug!!
-#exit 0
+function checkVar() {
+	var=$1
+	if [[ ${!var} == "" ]]; then
+		echo "${var}.map"
+		if [[ -e "${var}.map" ]]; then
+			cat "${var}.map"
+		fi
+		read "Enter value: "; ${!var}
+	fi
+	echo "${!var}"
+}
 
 IFS=$(echo -en "\n\b")
 for file in $(ls -1); do
