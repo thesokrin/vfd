@@ -1,3 +1,4 @@
+echo "Resource,Directory,Environment,Account"> atlas.csv
 for resource in $(cat resource-names); do 
 	path=`grep "/${resource}/" resources | cut -d'/' -f3-`
 	echo --------------------------------------------------------------------------
@@ -6,9 +7,7 @@ for resource in $(cat resource-names); do
 	echo $path
 	echo ---
 	for dir in $path; do
-		dira='./structure/'$dir
-		dir=$dira
-		dira=''
+		dira='./structure/'$dir;dir=$dira;dira='';
 		if [ x`echo $dir | grep 'environments' | echo $?` == x'0' ]; then
 			env=`echo $dir | grep 'environments' | cut -d'/' -f4`
 		else
@@ -21,6 +20,9 @@ for resource in $(cat resource-names); do
 		echo +Environment: $env
 		echo +Account: $account
 		echo ---
+
+		echo $resource,$dir,$env,$account >> atlas.csv 
+
 		env=''
 	done
 	echo --------------------------------------------------------------------------
