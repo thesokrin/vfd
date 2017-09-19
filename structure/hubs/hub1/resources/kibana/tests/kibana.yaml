@@ -1,0 +1,96 @@
+file:
+  /etc/init.d/kibana:
+    exists: true
+    mode: "0755"
+    owner: root
+    group: root
+    filetype: file
+    contains: []
+  /etc/init.d/kibana.default:
+    exists: true
+    mode: "0755"
+    owner: root
+    group: root
+    filetype: file
+    contains: []
+  /etc/init.d/nginx:
+    exists: true
+    mode: "0755"
+    owner: root
+    group: root
+    filetype: file
+    contains: []
+  /etc/kibana/kibana.default.yml:
+    exists: true
+    mode: "0644"
+    owner: root
+    group: root
+    filetype: file
+    contains: []
+  /etc/kibana/kibana.yml:
+    exists: true
+    mode: "0644"
+    owner: root
+    group: root
+    filetype: file
+    contains: []
+  /etc/nginx/nginx.conf:
+    exists: true
+    mode: "0755"
+    owner: root
+    group: root
+    filetype: file
+    contains: []
+  /etc/nginx/sites-enabled/kibana.conf:
+    exists: true
+    mode: "0777"
+    owner: root
+    group: root
+    linked-to: /etc/nginx/sites-available/kibana.conf
+    filetype: symlink
+    contains: []
+  /usr/local/openresty:
+    exists: true
+    mode: "0755"
+    owner: root
+    group: root
+    filetype: directory
+    contains: []
+  /usr/local/openresty/bin/resty:
+    exists: true
+    mode: "0755"
+    owner: root
+    group: root
+    filetype: file
+    contains: []
+package:
+  grindr-kibana:
+    installed: true
+  grindr-resty:
+    installed: true
+  grindr-role-kibana:
+    installed: true
+  grindr-role-resty:
+    installed: false
+process:
+  nginx:
+    running: true
+  node:
+    running: true
+port:
+  tcp:80:
+    listening: true
+    ip:
+    - 0.0.0.0
+  tcp:5601:
+    listening: true
+    ip:
+    - 127.0.0.1
+http:
+  http://localhost:
+    status: 200
+    allow-insecure: false
+    no-follow-redirects: false
+    timeout: 5000
+    body:
+     - "/app/kibana"

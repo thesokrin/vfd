@@ -1,0 +1,31 @@
+file:
+  /etc/init.d/grindr-role-collect:
+    exists: true
+    mode: "0755"
+    owner: root
+    group: root
+    filetype: file
+    contains: []
+  /etc/rsyslog.d/98-collect.conf:
+    exists: true
+    mode: "0644"
+    owner: root
+    group: root
+    filetype: file
+    contains:
+      - "collect.hub.grindr.io"
+package:
+  grindr-role-collect:
+    installed: true
+port:
+  tcp:514:
+    listening: true
+    ip:
+    - 0.0.0.0
+  udp:514:
+    listening: true
+    ip:
+    - 0.0.0.0
+process:
+  rsyslogd:
+    running: true

@@ -1,0 +1,4 @@
+---
+terraform_version: "0.8.8"
+terraform_install_root: "/opt/terraform/"
+bin_dir: "/usr/local/bin"

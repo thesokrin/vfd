@@ -1,0 +1,4 @@
+gossfile:
+  users-n-groups.yaml: {}
+  common_packages.yaml: {}
+  kafka.yaml: {}

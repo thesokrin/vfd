@@ -1,0 +1,20 @@
+file:
+  /etc/rsyslog.d/97-logstash.conf:
+    exists: true
+    mode: "0644"
+    owner: root
+    group: root
+    filetype: file
+    contains: ['action(type="omfwd" target="127.0.0.1" protocol="tcp" port="5514")']
+  /var/log/logstash/logstash-plain.log:
+    exists: true
+    mode: "0644"
+    owner: logstash
+    group: logstash
+    filetype: file
+    contains: []
+package:
+  grindr-role-logstash:
+    installed: true
+  grindr-logstash:
+    installed: true

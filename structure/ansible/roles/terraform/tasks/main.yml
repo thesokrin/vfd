@@ -1,0 +1,16 @@
+---
+ - name: create terraform directory
+   file: path={{ terraform_install_root }}/{{ terraform_version }} state=directory
+
+ - name: install terraform
+   unarchive:
+     copy: no
+     src: "https://releases.hashicorp.com/terraform/{{ terraform_version }}/terraform_{{ terraform_version }}_linux_amd64.zip"
+     dest: "{{ terraform_install_root }}/{{ terraform_version }}"
+     creates: "{{ terraform_install_root }}/{{ terraform_version }}/terraform"
+
+ - name: ensure bin directory exists
+   file: path={{ bin_dir }} state=directory
+
+ - name: create terraform symlink
+   file: src={{ terraform_install_root }}/{{ terraform_version }}/terraform dest={{ bin_dir }}/terraform state=link

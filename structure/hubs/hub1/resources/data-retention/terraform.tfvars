@@ -1,0 +1,7 @@
+atlas_environment = "hub"
+aws_account_id = "284224159432"
+bucket_name = "chat_image_archive"
+source_bucket_name = "s3.grindr.com"
+ec2_instance_type = "m4.large"
+project_name = "data-retention"
+project_owner = "isre"

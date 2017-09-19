@@ -1,0 +1,28 @@
+for resource in $(cat resource-names); do 
+	path=`grep "/${resource}/" resources | cut -d'/' -f3-`
+	echo --------------------------------------------------------------------------
+	echo Name: $resource
+	#path=$(echo $path | sed 's/\.\/atlas\//\.\/structure\//g' )
+	echo $path
+	echo ---
+	for dir in $path; do
+		dira='./structure/'$dir
+		dir=$dira
+		dira=''
+		if [ x`echo $dir | grep 'environments' | echo $?` == x'0' ]; then
+			env=`echo $dir | grep 'environments' | cut -d'/' -f4`
+		else
+			env='NA'
+		fi
+		if [ x$env == x'' ]; then env='NA'; fi
+		account=`cat $dir | grep 'AWS_ACCOUNT:=' | cut -d'=' -f2`
+		
+		echo +Path: $dir
+		echo +Environment: $env
+		echo +Account: $account
+		echo ---
+		env=''
+	done
+	echo --------------------------------------------------------------------------
+done
+

@@ -1,0 +1,18 @@
+.terraform
+terraform.tfstate
+terraform.tfstate.backup
+
+/.vagrant
+
+# ansible galaxy roles directory
+/ansible/galaxy_roles
+
+# temporary plan file
+/plan.txt
+
+# runtime files from scripts
+*.pyc
+
+# lambda zips
+modules/code_pipeline/code_pipeline.zip
+modules/code_pipeline/scripts/lib

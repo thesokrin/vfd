@@ -1,0 +1,32 @@
+---
+dist: trusty
+language: python
+python:
+  - "3.5"
+
+cache:
+  pip: true
+  directories:
+    - $HOME/terraform
+
+before_install:
+  - pip install ansible
+  - ansible --version
+  - ansible-playbook -c local -i localhost, ansible/travis-playbook.yml
+
+install: true
+
+script:
+  - bin/atlas-project-validate .
+
+notifications:
+  slack:
+    on_pull_requests: false
+    on_success: never
+    on_change: never
+    on_failure: always
+    rooms:
+      - grindr:myhBr2I4qNgTSRY4tej9XpVr#atlas
+  email:
+    on_success: never
+    on_failure: never

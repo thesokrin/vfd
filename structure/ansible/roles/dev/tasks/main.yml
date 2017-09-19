@@ -1,0 +1,4 @@
+---
+ - name: install system utility packages
+   package: name={{ item }} state=present
+   with_items: [unzip, git, jq]

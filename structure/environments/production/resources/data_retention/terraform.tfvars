@@ -1,0 +1,8 @@
+aws_account_id = "058144102190"
+aws_region = "us-east-1"
+env_name = "production"
+zone = "prod.grindr.io"
+project_owner="isre"
+project_name="data-retention"
+name="data-retention"
+ec2_instance_type="m4.xlarge"
