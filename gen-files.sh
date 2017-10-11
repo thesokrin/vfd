@@ -1,6 +1,16 @@
 #!/bin/bash
+shopt -s expand_aliases
 # either just run this with no arguments and it will ask what's needed to spin up anything or you can fill out a vars file.
 # if you missed anything then it will ask for clarification...then using MAGIC it will generate the files for the resource and spin it up
+
+function deriveVars() {
+	account="$(cat account.map | grep $account | cut -d',' -f1)"
+	account_description="$(cat account.map | grep $account | cut -d',' -f2)"
+	account_id="$(cat account.map | grep $account | cut -d',' -f3)"
+	environment="$(cat environment.map | grep $environment | cut -d',' -f1)"
+	environment_fancy="$(cat environment.map | grep $environment | cut -d',' -f2)"
+	environment_description="$(cat environment.map | grep $environment | cut -d',' -f3)"
+}
 
 function sourceFile() {
 	filename=$1
@@ -13,13 +23,18 @@ function sourceFile() {
 }
 
 function checkVar() {
+	deriveVars
 	var=$1
+	#echo $var ${!var}
 	if [[ ${!var} == "" ]]; then
-		echo "${var}.map"
-		if [[ -e "${var}.map" ]]; then
-			cat "${var}.map"
-		fi
-		read "Enter value: "; ${!var}
+		echo "Enter value: "; read ${var}
+	elif [[ -e "${var}.map" ]]; then
+		while ! grep ${!var} ${var}.map >/dev/null; do
+			echo "Option '${!var}' is invalid. Possible valid options are: "
+			cat ${var}.map
+			echo -n "Enter new value: "; read ${var}
+			deriveVars
+		done
 	fi
 	echo "${!var}"
 }
@@ -61,6 +76,7 @@ while getopts "n:d:e:l:a:h" opt; do
   esac
 done
 
+echo ""
 #exit 0
 
 # futurey sourcey cleanupy stuffs
@@ -77,10 +93,7 @@ sourceFile "${name}.project" || echo "Project file for $name not found." #file f
 
 # auto-determined values (there's no such thing as MAGIC)
 # do a little logic (break a sweat with that elbow grease)
-account_id="$(cat account.map | grep $account | cut -d',' -f3)"
-account_description="$(cat account.map | grep $account | cut -d',' -f2)"
-environment_fancy="$(cat environment.map | grep $environment | cut -d',' -f2)"
-environment_description="$(cat environment.map | grep $environment | cut -d',' -f3)"
+deriveVars
 
 # reset the spanish inquisition state
 ask_instances='0'
@@ -91,7 +104,7 @@ ask_modules='0'
 
 
 # purely static variables-ish
-modules='atlas_static_service' # soon to be 'atlas_defaults' and then if REQUIRED you can EASILY tack on any other module
+# soon to be 'atlas_defaults' and then if REQUIRED you can EASILY tack on any other module
 
 # make it so it will auto-gen the resources files around the module-required definitions auto-gen'd from grepping/sed'ing the module
 # files. possibly future, interactive-repair during checks. no need to edit,save,plan... . just edit, plan, improvise, done
@@ -99,24 +112,25 @@ modules='atlas_static_service' # soon to be 'atlas_defaults' and then if REQUIRE
 
 # eventually flip through an array of modules listed (do modules require anything extra?)
 # if moduledir doesn't exist then ask_modules=1
-if [[ -e "structure/modules/$modules/" ]]; then
-	echo "Module "$modules" exists!"
-	ask_modules='0'
-else
-	echo "Module(s) "$modules" not found!"
-	ask_modules='1'
-fi
+function checkModule() {
+	if [[ -e "atlas/modules/$module/" ]]; then
+		echo "Module "$module" exists!"
+		ask_modules='0'
+	else
+		echo "Module "$module" not found!"
+		ask_modules='1'
+	fi
+}
 # if remote state isn't defined then use the atlas remote state - in future you can specify multiple remote states,
 # each assigned to it's short name
-remotestate="atlas"
 
 # make echo not return a newline automatically
-alias echo='echo -n'
+alias echo='echo -e -n'
 
-echo ""
-echo "---Variables---"
-echo " Fancy name: "; checkvar fname
-echo " Short name: "; checkvar name
+echo "\n"
+echo "---Variables---\n"
+echo " Fancy name: "; checkVar fname
+echo " Short name: "; checkVar name
 echo " Description: "; checkVar description
 echo " Type: "; checkVar type
 echo " Team: "; checkVar team
@@ -126,19 +140,20 @@ echo " Remote state: "; checkVar remotestate
 echo " Account: "; checkVar account
 echo " Account Description: "; checkVar account_description
 echo " Account ID: "; checkVar account_id
-echo " Modules: "; checkVar modules
-echo "---End of Variables---"
-echo ""
+echo " Module: "; checkVar module
+echo "---End of Variables---\n"
+echo "\n"
 
 # reset echo
 alias echo=echo
 
 # populate the basic templates (eventually source a global variables.tf file instead of things flying willy-nilly)
-# woah there, exiting now cause debug!!
-exit 0
+## woah there, exiting now cause debug!!
+#exit 0
 
 # prepare directory structure
-cd ~/vfd/structure
+rootDir=$(pwd)
+cd ~/vfd/atlas
 if [[ "x$environment" == "xhub" ]]; then
 	newdir="hubs/hub1/$type/$name"
 else
@@ -148,26 +163,33 @@ fi
 echo "Resource destination location: "$newdir
 mkdir -p $newdir || exit 1
 cd $newdir || exit 1
+echo "Cleaning directory..."
+rm * 2>/dev/null
 cp -r ~/vfd/resource/* .
 pwd
 
+echo "Generating tf files..."
+alias sed="sed -i"
 IFS=$(echo -en "\n\b")
 for file in $(ls -1); do
-	sed 's/$_FANCY_NAME/$fname/g' $file
-	sed 's/$_NAME/$name/g' $file
-	sed 's/$_TYPE/$type/g' $file
-	sed 's/$_OWNER/$owner/g' $file
-	sed 's/$_TEAM/$team/g' $file
-	sed 's/$_DESCRIPTION/$description/g' $file
-	sed 's/$_ENVIRONMENT/$environment/g' $file
-	sed 's/$_ENVIRONMENT_FANCY/$environment_fancy/g' $file
-	sed 's/$_ENVIRONMENT_DESCRIPTION/$environment_description/g' $file
-	sed 's/$_REMOTE_STATE/$remotestate/g' $file
-	sed 's/$_ACCOUNT_NAME/$account/g' $file
-	sed 's/$_ACCOUNT_DESCRIPTION/$account_description/g' $file
-	sed 's/$_ACCOUNT_ID/$account_id/g' $file
-#	sed 's/$_//g' $file
+	sed -i "s/\$_FANCY_NAME/$fname/g" $file
+	sed -i "s/\$_NAME/$name/g" $file
+	sed -i "s/\$_TYPE/$type/g" $file
+	sed -i "s/\$_OWNER/$owner/g" $file
+	sed -i "s/\$_TEAM/$team/g" $file
+	sed -i "s/\$_DESCRIPTION/$description/g" $file
+	sed -i "s/\$_ENVIRONMENT/$environment/g" $file
+	sed -i "s/\$_ENVIRONMENT_FANCY/$environment_fancy/g" $file
+	sed -i "s/\$_ENVIRONMENT_DESCRIPTION/$environment_description/g" $file
+	sed -i "s/\$_REMOTE_STATE/$remotestate/g" $file
+	sed -i "s/\$_ACCOUNT_NAME/$account/g" $file
+	sed -i "s/\$_ACCOUNT_DESCRIPTION/$account_description/g" $file
+	sed -i "s/\$_ACCOUNT_ID/$account_id/g" $file
+	sed -i "s/\$_MODULE/$module/g" $file
+	#sed -i "s/\$_//g' $file
 done
+
+alias sed='sed'
 
 # start getting nosey with the chat questions
 
@@ -186,3 +208,9 @@ done
 # permissions
 	# if it's not using storage then why include anything to do with s3?
 	# bucket generation determines things like read/write/access
+
+echo "Generation complete!"
+echo "Running plan..."
+cd $rootDir
+aws-env $account && vagrant ssh -c "make -C $newdir plan > plan.output"
+echo "Plan has run. It was a "

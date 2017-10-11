@@ -1,4 +1,6 @@
 # hardcoded for now cause just cause - will be put in a default source file that should never
 # need to be touched...and probably auto-gen'd using fierce witchcraft
 team="isre"
-owner="matt.demery"
+owner="ISRE Team"
+module='atlas_static_service'
+remotestate="atlas"
