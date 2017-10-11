@@ -12,6 +12,12 @@ variable "env_name" {
   EOF
 }
 
+variable "atlas_environment" {
+  description = <<-EOF
+    Atlas Environment
+  EOF
+}
+
 variable "env_name_short" {
   description = <<-EOF
     Short, slugified environment name of the Atlas Environment.
@@ -82,17 +88,17 @@ variable "asg_capacity" {
   EOF
 }
 
-variable "asg_instance_type" {
-  description = <<-EOF
-    EC2 instance type for the $_NAME instances.
-  EOF
-}
+# variable "asg_instance_type" {
+#   description = <<-EOF
+#     EC2 instance type for the $_NAME instances.
+#   EOF
+# }
 
-variable "asg_cidr_block" {
-  description = <<-EOF
-    CIDR block of the target Atlas Environment.
-  EOF
-}
+# variable "asg_cidr_block" {
+#   description = <<-EOF
+#     CIDR block of the target Atlas Environment.
+#   EOF
+# }
 
 variable "asg_ami_id" {
   default = "ami-9c9d3b8a"
@@ -102,67 +108,67 @@ variable "asg_ami_id" {
   EOF
 }
 
-variable "asg_hub_cidr_block" {
-  description = <<-EOF
-    CIDR block of the Atlas Hub.
-  EOF
-}
+# variable "asg_hub_cidr_block" {
+#   description = <<-EOF
+#     CIDR block of the Atlas Hub.
+#   EOF
+# }
 
-variable "asg_lahq_cidr_block" {
-  description = <<-EOF
-    The CIDR block for Grindr LA HQ.
-  EOF
-}
+# variable "asg_lahq_cidr_block" {
+#   description = <<-EOF
+#     The CIDR block for Grindr LA HQ.
+#   EOF
+# }
 
-variable "asg_layer_admin_cidr_blocks" {
-  type = "list"
+# variable "asg_layer_admin_cidr_blocks" {
+#   type = "list"
+#
+#   description = <<-EOF
+#     List of three CIDR blocks for subnets in the Atlas Admin Layer.
+#   EOF
+# }
 
-  description = <<-EOF
-    List of three CIDR blocks for subnets in the Atlas Admin Layer.
-  EOF
-}
+# variable "asg_layer_public_cidr_blocks" {
+#   type = "list"
+#
+#   description = <<-EOF
+#     List of three CIDR blocks for subnets in the Atlas Public Layer.
+#   EOF
+# }
 
-variable "asg_layer_public_cidr_blocks" {
-  type = "list"
+# variable "asg_layer_services_subnet_ids" {
+#   type = "list"
+#
+#   description = <<-EOF
+#     List of three subnet ids for subnets in the Atlas Service Layer.
+#   EOF
+# }
 
-  description = <<-EOF
-    List of three CIDR blocks for subnets in the Atlas Public Layer.
-  EOF
-}
+# variable "asg_layer_services_cidr_blocks" {
+#   type = "list"
+#
+#   description = <<-EOF
+#     List of three subnet ids for subnets in the Atlas Services Layer.
+#   EOF
+# }
 
-variable "asg_layer_services_subnet_ids" {
-  type = "list"
+# variable "asg_name" {
+#   description = <<-EOF
+#     Name that will used to derive our hostnames.
+#   EOF
+# }
 
-  description = <<-EOF
-    List of three subnet ids for subnets in the Atlas Service Layer.
-  EOF
-}
+# variable "asg_private_zone_id" {
+#   description = <<-EOF
+#     Hosted zone id for the given Atlas Environment's private hosted zone.
+#   EOF
+# }
 
-variable "asg_layer_services_cidr_blocks" {
-  type = "list"
-
-  description = <<-EOF
-    List of three subnet ids for subnets in the Atlas Services Layer.
-  EOF
-}
-
-variable "asg_name" {
-  description = <<-EOF
-    Name that will used to derive our hostnames.
-  EOF
-}
-
-variable "asg_private_zone_id" {
-  description = <<-EOF
-    Hosted zone id for the given Atlas Environment's private hosted zone.
-  EOF
-}
-
-variable "asg_project_name" {
-  description = <<-EOF
-    The project name which this module lives in.
-  EOF
-}
+# variable "asg_project_name" {
+#   description = <<-EOF
+#     The project name which this module lives in.
+#   EOF
+# }
 
 variable "asg_project_name_fancy" {
   default = "Service"
@@ -188,17 +194,11 @@ variable "asg_role_package" {
   EOF
 }
 
-variable "asg_vpc_id" {
-  description = <<-EOF
-    VPC ID of the given Atlas Environment.
-  EOF
-}
-
-variable "asg_zone" {
-  description = <<-EOF
-    The hosted zone name of this Atlas Environment.
-  EOF
-}
+# variable "asg_vpc_id" {
+#   description = <<-EOF
+#     VPC ID of the given Atlas Environment.
+#   EOF
+# }
 
 variable "asg_spot_price" {
   default = ""
