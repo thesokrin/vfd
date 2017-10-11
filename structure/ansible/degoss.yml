@@ -1,0 +1,4 @@
+- hosts: "{{ variable_host | default('servers') }}"
+  become: true
+  roles:
+    - { role: degoss }

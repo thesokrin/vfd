@@ -1,0 +1,106 @@
+file:
+  /home/chat/.ssh/authorized_keys:
+    exists: true
+    mode: "0600"
+    owner: chat
+    group: users
+    filetype: file
+    contains: []
+  /home/dev/.ssh/authorized_keys:
+    exists: false
+    contains: []
+  /home/dsci/.ssh/authorized_keys:
+    exists: true
+    mode: "0600"
+    owner: dsci
+    group: users
+    filetype: file
+    contains: []
+  /home/grindrapp/.ssh/authorized_keys:
+    exists: false
+    contains: []
+  /home/isre/.ssh/authorized_keys:
+    exists: true
+    mode: "0600"
+    owner: isre
+    group: users
+    filetype: file
+    contains: []
+  /home/noc/.ssh/authorized_keys:
+    exists: true
+    mode: "0600"
+    owner: noc
+    group: users
+    filetype: file
+    contains: []
+  /home/qa/.ssh/authorized_keys:
+    exists: false
+    contains: []
+user:
+  chat:
+    exists: true
+    groups:
+    - chat
+    - grindrapp
+    - users
+    home: /home/chat
+    shell: /bin/bash
+  dev:
+    exists: true
+    groups:
+    - chat
+    - dev
+    - grindrapp
+    - users
+    home: /home/dev
+    shell: /bin/bash
+  dsci:
+    exists: true
+    groups:
+    - dsci
+    - users
+    home: /home/dsci
+    shell: /bin/bash
+  isre:
+    exists: true
+    groups:
+    - chat
+    - grindr
+    - grindrapp
+    - isre
+    - noc
+    - users
+    home: /home/isre
+    shell: /bin/bash
+  noc:
+    exists: true
+    groups:
+    - grindrapp
+    - noc
+    - users
+    home: /home/noc
+    shell: /bin/bash
+  qa:
+    exists: true
+    groups:
+    - dev
+    - grindrapp
+    - qa
+    - users
+    home: /home/qa
+    shell: /bin/bash
+group:
+  chat:
+    exists: true
+  dev:
+    exists: true
+  docker:
+    exists: true
+  dsci:
+    exists: true
+  grindrapp:
+    exists: true
+  isre:
+    exists: true
+  qa:
+    exists: true

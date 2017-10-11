@@ -1,0 +1,150 @@
+Refreshing Terraform state in-memory prior to plan...
+The refreshed state will be used to calculate this plan, but
+will not be persisted to local or remote state storage.
+
+data.terraform_remote_state.hub: Refreshing state...
+data.terraform_remote_state.environment: Refreshing state...
+module.gocd_server.data.terraform_remote_state.environment: Refreshing state...
+module.gocd_server.data.terraform_remote_state.hub: Refreshing state...
+module.gocd_agent.data.terraform_remote_state.hub: Refreshing state...
+module.gocd_agent.data.terraform_remote_state.environment: Refreshing state...
+aws_iam_role.master: Refreshing state... (ID: atlas_prod_gocd_master_role)
+module.gocd_agent.data.template_file.cloudinit: Refreshing state...
+module.gocd_server.data.template_file.cloudinit: Refreshing state...
+module.gocd_server.aws_security_group.default: Refreshing state... (ID: sg-0aec6d7a)
+module.gocd_server.aws_iam_instance_profile.default: Refreshing state... (ID: atlas_prod_gocd_master_profile)
+module.gocd_server.aws_instance.default: Refreshing state... (ID: i-0f6516c773e460adc)
+module.gocd_server.aws_route53_record.private: Refreshing state... (ID: Z2R2BOBPMOS28B_gocd-master_A)
+module.gocd_server.aws_route53_record.reverse: Refreshing state... (ID: Z38JFD4LMHKUJP_164.30.2.10.in-addr.arpa_PTR)
+
+The Terraform execution plan has been generated and is shown below.
+Resources are shown in alphabetical order for quick scanning. Green resources
+will be created (or destroyed and then created if an existing resource
+exists), yellow resources are being changed in-place, and red resources
+will be destroyed. Cyan entries are data sources to be read.
+
+Your plan was also saved to the path below. Call the "apply" subcommand
+with this plan file and Terraform will exactly execute this execution
+plan.
+
+Path: .terraform/terraform.tfplan
+
++ aws_iam_role.agent
+    arn:                "<computed>"
+    assume_role_policy: "{\n  \"Version\": \"2012-10-17\",\n  \"Statement\": [\n    {\n      \"Effect\": \"Allow\",\n      \"Principal\": { \"Service\": \"ec2.amazonaws.com\"},\n      \"Action\": \"sts:AssumeRole\"\n    }\n  ]\n}\n"
+    create_date:        "<computed>"
+    name:               "atlas_prod_gocd_agent_role"
+    path:               "/"
+    unique_id:          "<computed>"
+
++ module.gocd_agent.aws_iam_instance_profile.default
+    arn:              "<computed>"
+    create_date:      "<computed>"
+    name:             "atlas_prod_gocd_agent_profile"
+    path:             "/"
+    roles.#:          "1"
+    roles.2285045351: "atlas_prod_gocd_agent_role"
+    unique_id:        "<computed>"
+
++ module.gocd_agent.aws_instance.default
+    ami:                                       "ami-9c9d3b8a"
+    associate_public_ip_address:               "<computed>"
+    availability_zone:                         "<computed>"
+    ebs_block_device.#:                        "<computed>"
+    ephemeral_block_device.#:                  "<computed>"
+    iam_instance_profile:                      "atlas_prod_gocd_agent_profile"
+    instance_state:                            "<computed>"
+    instance_type:                             "m4.large"
+    ipv6_addresses.#:                          "<computed>"
+    key_name:                                  "isre-shared"
+    network_interface_id:                      "<computed>"
+    placement_group:                           "<computed>"
+    private_dns:                               "<computed>"
+    private_ip:                                "<computed>"
+    public_dns:                                "<computed>"
+    public_ip:                                 "<computed>"
+    root_block_device.#:                       "1"
+    root_block_device.0.delete_on_termination: "true"
+    root_block_device.0.iops:                  "<computed>"
+    root_block_device.0.volume_size:           "32"
+    root_block_device.0.volume_type:           "gp2"
+    security_groups.#:                         "<computed>"
+    source_dest_check:                         "true"
+    subnet_id:                                 "subnet-93ffc1da"
+    tags.%:                                    "6"
+    tags.Name:                                 "gocd-agent.prod.grindr.io"
+    tags.atlas_environment:                    "production"
+    tags.atlas_layer:                          "services"
+    tags.atlas_project:                        "gocd"
+    tags.atlas_zone:                           "prod.grindr.io"
+    tags.project_owner:                        "isre"
+    tenancy:                                   "<computed>"
+    user_data:                                 "22d568d2db93e4c535a0727e85ca234fa13f0e31"
+    vpc_security_group_ids.#:                  "<computed>"
+
++ module.gocd_agent.aws_route53_record.private
+    fqdn:      "<computed>"
+    name:      "gocd-agent"
+    records.#: "<computed>"
+    ttl:       "5"
+    type:      "A"
+    zone_id:   "Z2R2BOBPMOS28B"
+
++ module.gocd_agent.aws_route53_record.reverse
+    fqdn:      "<computed>"
+    name:      "${format(\"%s.%s.%s.10.in-addr.arpa\",\n    element(split(\".\", element(aws_instance.default.*.private_ip, count.index)), 3),\n    element(split(\".\", element(aws_instance.default.*.private_ip, count.index)), 2),\n    element(split(\".\", element(aws_instance.default.*.private_ip, count.index)), 1)\n  )}"
+    records.#: "<computed>"
+    ttl:       "5"
+    type:      "PTR"
+    zone_id:   "Z38JFD4LMHKUJP"
+
++ module.gocd_agent.aws_security_group.default
+    description:                          "Security group for Static Services (gocd-agent) instances in the Atlas Production Environment."
+    egress.#:                             "1"
+    egress.482069346.cidr_blocks.#:       "1"
+    egress.482069346.cidr_blocks.0:       "0.0.0.0/0"
+    egress.482069346.from_port:           "0"
+    egress.482069346.prefix_list_ids.#:   "0"
+    egress.482069346.protocol:            "-1"
+    egress.482069346.security_groups.#:   "0"
+    egress.482069346.self:                "false"
+    egress.482069346.to_port:             "0"
+    ingress.#:                            "2"
+    ingress.1875505079.cidr_blocks.#:     "3"
+    ingress.1875505079.cidr_blocks.0:     "10.2.0.0/16"
+    ingress.1875505079.cidr_blocks.1:     "10.10.0.0/16"
+    ingress.1875505079.cidr_blocks.2:     "10.40.0.0/21"
+    ingress.1875505079.from_port:         "22"
+    ingress.1875505079.protocol:          "tcp"
+    ingress.1875505079.security_groups.#: "0"
+    ingress.1875505079.self:              "false"
+    ingress.1875505079.to_port:           "22"
+    ingress.2580806771.cidr_blocks.#:     "12"
+    ingress.2580806771.cidr_blocks.0:     "10.2.20.0/23"
+    ingress.2580806771.cidr_blocks.1:     "10.2.22.0/23"
+    ingress.2580806771.cidr_blocks.10:    "10.10.12.0/23"
+    ingress.2580806771.cidr_blocks.11:    "10.10.14.0/23"
+    ingress.2580806771.cidr_blocks.2:     "10.2.24.0/23"
+    ingress.2580806771.cidr_blocks.3:     "10.2.30.0/23"
+    ingress.2580806771.cidr_blocks.4:     "10.2.32.0/23"
+    ingress.2580806771.cidr_blocks.5:     "10.2.34.0/23"
+    ingress.2580806771.cidr_blocks.6:     "10.2.10.0/23"
+    ingress.2580806771.cidr_blocks.7:     "10.2.12.0/23"
+    ingress.2580806771.cidr_blocks.8:     "10.2.14.0/23"
+    ingress.2580806771.cidr_blocks.9:     "10.10.10.0/23"
+    ingress.2580806771.from_port:         "80"
+    ingress.2580806771.protocol:          "tcp"
+    ingress.2580806771.security_groups.#: "0"
+    ingress.2580806771.self:              "false"
+    ingress.2580806771.to_port:           "80"
+    name:                                 "gocd-agent.prod.grindr.io"
+    owner_id:                             "<computed>"
+    tags.%:                               "6"
+    tags.Name:                            "gocd-agent.prod.grindr.io"
+    tags.atlas_environment:               "production"
+    tags.atlas_layer:                     "services"
+    tags.atlas_project:                   "gocd"
+    tags.atlas_zone:                      "prod.grindr.io"
+    tags.project_owner:                   "isre"
+    vpc_id:                               "vpc-a5ac3fc3"
+Plan: 6 to add, 0 to change, 0 to destroy.

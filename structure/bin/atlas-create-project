@@ -1,0 +1,187 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8
+
+import argparse
+import sys
+
+from jinja2 import Template
+from pathlib import Path
+
+
+AWS_ACCOUNTS = {
+    'development': '780453558463',
+    'staging':     '886703752586',
+    'preprod':     '202004573189',
+    'production':  '284224159432',
+    'prod-3.0':    '058144102190',
+}
+
+ENVIRONMENTS = {
+    'dev': {
+        'aws': {
+            'id': '202004573189',
+            'name': 'preprod',
+        },
+        'short': 'dev',
+        'long': 'development',
+        'fancy': 'Atlas Development Environment',
+    },
+    'stg': {
+        'aws': {
+            'id': '886703752586',
+            'name': 'staging'
+        },
+        'short': 'stg',
+        'long': 'staging',
+        'fancy': 'Atlas Staging Environment',
+    },
+    'prod': {
+        'aws': {
+            'id': '058144102190',
+            'name': 'prod-3.0',
+        },
+        'short': 'prod',
+        'long': 'production',
+        'fancy': 'Atlas Production Environment'
+    },
+    'dsci': {
+        'aws': {
+            'id': '058144102190',
+            'name': 'prod-3.0',
+        },
+        'short': 'dsci',
+        'long': 'datascience',
+        'fancy': 'Atlas Data-Science Environment',
+    },
+    'hub': {
+        'aws': {
+            'id': '284224159432',
+            'name': 'production',
+        },
+        'short': 'hub',
+        'long': 'hub',
+        'fancy': 'Atlas Hub',
+    }
+}
+
+REQUIREMENTS = (
+    'asg',
+    'elb',
+    'dns',
+    'ec2',
+    's3',
+)
+
+TEMPLATE_MAIN_TF = """
+# {{ env_name_fancy }} - {{ project_name_fancy }} Resources
+
+provider "aws" {
+  region = "${var.aws_region}"
+  allowed_account_ids = ["${var.aws_account_id}"]
+}
+""".strip()
+
+TEMPLATE_OUTPUTS_TF = """
+# {{ env_name_fancy }} - {{ project_name_fancy }} Resources - Outputs
+
+output "aws_region" {
+  value = "${var.aws_region}"
+}
+
+output "aws_account_id" {
+  value = "${var.aws_account_id}"
+}
+
+output "exported_modules" {
+  value = []
+}
+""".strip()
+
+TEMPLATE_VARIABLES_TF = """
+# {{ env_name_fancy }} - {{ project_name_fancy }} Resources - Variables
+
+variable "aws_account_id" {
+  description = <<-EOF
+    The AWS account id of this project's Atlas Hub or Environment.
+  EOF
+}
+
+variable "aws_region" {
+  description = <<-EOF
+    The AWS region of this project's Atlas Hub or Environment.
+  EOF
+}
+""".strip()
+
+TEMPLATE_TERRAFORM_TFVARS = """
+# {{ env_name_fancy }} - {{ project_name_fancy }} Resources - Configuration
+
+aws_account_id = "{{ aws_account_id }}"
+aws_region = "{{ aws_region }}"
+""".strip()
+
+
+def main():
+    """Main entrypoint."""
+    parser = argparse.ArgumentParser(description="Generate a skeleton Atlas Project.")
+    parser.add_argument('-n', '--name', help="Fancy project name, ie \"Artemis\".")
+    parser.add_argument('-e', '--environment', choices=ENVIRONMENTS.keys(), help="Atlas Environment.")
+    parser.add_argument('-r', dest='requirements', default=[], help="Add a project requirement.", nargs='*',
+        choices=REQUIREMENTS)
+    parser.add_argument('path', type=Path, help="Path to the project to create.")
+
+    args = parser.parse_args()
+
+    generate_project(args.path, args.name, args.environment, args.requirements)
+
+
+def generate_project(path, project_name, environment, requirements):
+    """Generate the project based on the inputs."""
+
+    # create the project directory if it doesn't exist
+    if not path.is_dir():
+        path.mkdir(mode=755)
+
+    generate_main_tf(path, project_name, environment)
+    generate_outputs_tf(path, project_name, environment)
+    generate_variables_tf(path, project_name, environment)
+
+
+def generate_main_tf(basedir, project_name, environment):
+    """Generates a project's main.tf file."""
+    if not basedir.joinpath('main.tf').is_file():
+        with open(str(basedir.joinpath('main.tf')), 'w') as f:
+            f.write(Template(TEMPLATE_MAIN_TF).render(
+                env_name_fancy=ENVIRONMENTS.get(environment).get('fancy'),
+                project_name_fancy=project_name,
+            ))
+
+
+def generate_outputs_tf(basedir, project_name, environment):
+    """Generates a project's outputs.tf file."""
+    if not basedir.joinpath('outputs.tf').is_file():
+        with open(str(basedir.joinpath('outputs.tf')), 'w') as f:
+            f.write(Template(TEMPLATE_OUTPUTS_TF).render(
+                env_name_fancy=ENVIRONMENTS.get(environment).get('fancy'),
+                project_name_fancy=project_name,
+            ))
+
+def generate_variables_tf(basedir, project_name, environment):
+    """Generates a project's variables.tf file."""
+    if not basedir.joinpath('variables.tf').is_file():
+        with open(str(basedir.joinpath('variables.tf')), 'w') as f:
+            f.write(Template(TEMPLATE_VARIABLES_TF).render(
+                env_name_fancy=ENVIRONMENTS.get(environment).get('fancy'),
+                project_name_fancy=project_name,
+            ))
+
+
+def error(message, rc=1):
+    """Print an error message and then exit with the given return code."""
+    sys.stderr.write("{}\n".format(message))
+    sys.stderr.flush()
+    sys.exit(rc)
+
+
+if __name__ == "__main__":
+    main()
