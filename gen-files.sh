@@ -12,6 +12,18 @@ function sourceFile() {
 	fi;
 }
 
+function checkVar() {
+	var=$1
+	if [[ ${!var} == "" ]]; then
+		echo "${var}.map"
+		if [[ -e "${var}.map" ]]; then
+			cat "${var}.map"
+		fi
+		read "Enter value: "; ${!var}
+	fi
+	echo "${!var}"
+}
+
 while getopts "n:d:e:l:a:h" opt; do
   case $opt in
 		n)
@@ -55,17 +67,13 @@ done
 sourceFile "config.defaults" || echo "Defaults file config.defaults is NOT found. "#default variables on a per-creator basis
 sourceFile "core.defaults" || echo "Defaults file config.defaults is NOT found. "#default variables on a per-creator basis
 
-# set variables. we're down to 5 inputs required at default. yaa!
+# set variables. we're down to 5 inputs required at runtime. yaa!
 #fname=$1
 #name = $(echo $fname | sed 's/'s/\(.*\)/\L\1/'| sed 's/[^a-zA-Z0-9]//g'); fi
 if [[ ! $name ]]; then
 	name=$(echo $fname | perl -pe 'y/[A-Z]/[a-z]/' | sed 's/[^a-zA-Z0-9]//g')
 fi
 sourceFile "${name}.project" || echo "Project file for $name not found." #file full of everything needed to spin up anything ever that isn't included in the defaults
-#description=$2
-#environment=$3
-#layer=$4
-#account=$5
 
 # auto-determined values (there's no such thing as MAGIC)
 # do a little logic (break a sweat with that elbow grease)
@@ -95,37 +103,39 @@ if [[ -e "structure/modules/$modules/" ]]; then
 	echo "Module "$modules" exists!"
 	ask_modules='0'
 else
-	echo "Module "$modules" hasn't been existed yet!"
+	echo "Module(s) "$modules" not found!"
 	ask_modules='1'
 fi
 # if remote state isn't defined then use the atlas remote state - in future you can specify multiple remote states,
 # each assigned to it's short name
 remotestate="atlas"
 
-alias en='echo -n'
+# make echo not return a newline automatically
+alias echo='echo -n'
 
 echo ""
-echo "variables:"
-en "Fancy name: "; checkvar fname
-echo "Short name: "$name
-echo "Description: "$description
-echo "Type: "$type
-echo "Team: "$team
-echo "Owner: "$owner
-echo -n "Environment: "; checkVar environment
-echo -n "Remote state: "; checkVar remotestate
-echo "Account: "$account
-echo "Account Description: "$account_description
-echo "Account ID: "$account_id
-echo "Modules: "$modules
-echo "end variables"
+echo "---Variables---"
+echo " Fancy name: "; checkvar fname
+echo " Short name: "; checkvar name
+echo " Description: "; checkVar description
+echo " Type: "; checkVar type
+echo " Team: "; checkVar team
+echo " Owner: "; checkVar owner
+echo " Environment: "; checkVar environment
+echo " Remote state: "; checkVar remotestate
+echo " Account: "; checkVar account
+echo " Account Description: "; checkVar account_description
+echo " Account ID: "; checkVar account_id
+echo " Modules: "; checkVar modules
+echo "---End of Variables---"
 echo ""
+
+# reset echo
+alias echo=echo
+
 # populate the basic templates (eventually source a global variables.tf file instead of things flying willy-nilly)
 # woah there, exiting now cause debug!!
 exit 0
-
-
-
 
 # prepare directory structure
 cd ~/vfd/structure
@@ -140,18 +150,6 @@ mkdir -p $newdir || exit 1
 cd $newdir || exit 1
 cp -r ~/vfd/resource/* .
 pwd
-
-function checkVar() {
-	var=$1
-	if [[ ${!var} == "" ]]; then
-		echo "${var}.map"
-		if [[ -e "${var}.map" ]]; then
-			cat "${var}.map"
-		fi
-		read "Enter value: "; ${!var}
-	fi
-	echo "${!var}"
-}
 
 IFS=$(echo -en "\n\b")
 for file in $(ls -1); do
