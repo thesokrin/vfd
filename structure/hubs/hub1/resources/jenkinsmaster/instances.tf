@@ -1,4 +1,4 @@
-# Atlas $_ENVIRONMENT Environment - $_FANCY_NAME - Instances
+# Atlas hub Environment - Jenkins Master - Instances
 
 module "spot_services"{
   source = "../../../../modules/atlas_service"

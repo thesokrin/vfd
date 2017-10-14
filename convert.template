@@ -1,0 +1,21 @@
+shopt -s expand_aliases
+
+rootDir=$(pwd)
+varfile=$1
+from=$2
+to=$3
+
+alias csv="cut -d','"
+
+IFS=$(echo -en "\n\b")
+for file in $(ls -1); do
+	for line in $(cat $varfile); do
+		template=$(echo $line | csv -f1)
+		var=$(echo $line | csv -f2 | sed 's/\$//g')
+		fancyvar=$(echo $line | csv -f3)
+		if [[ $fancyvar != "" ]]; then
+			sed -i "s/$var/$template/g" $file
+		fi
+	done
+done
+

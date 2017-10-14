@@ -1,0 +1,6 @@
+ec2_instance_type="c4.large"
+description="Jenkins CD Master Resource"
+environment=hub
+layer=admin
+account=Legacy
+ec2_instance_count=1

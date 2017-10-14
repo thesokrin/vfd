@@ -1,21 +1,47 @@
 #!/bin/bash
 shopt -s expand_aliases
+rootDir=$(pwd)
+oldIFS=$IFS
+
+function errCatch() {
+	err=$1; echo "Error $err. Exiting..."; exit $err
+}
+
+echo "Initial checks..."
+if [[ ! -e ./atlas ]]; then
+	echo "Atlas directory is being populated..."
+	#sleep 10
+	git clone git@github.com:grindrllc/atlas.git || errCatch $?
+	echo "Done!"
+else
+	cd atlas
+	git checkout master && git pull || git reset --hard && git pull || errCatch $?
+	cd $rootDir
+	echo "Atlas directory is ready!"
+fi
+
 # either just run this with no arguments and it will ask what's needed to spin up anything or you can fill out a vars file.
 # if you missed anything then it will ask for clarification...then using MAGIC it will generate the files for the resource and spin it up
 
+# will write a better "roundabout" function here
 function deriveVars() {
-	account="$(cat account.map | grep $account | cut -d',' -f1)"
-	account_description="$(cat account.map | grep $account | cut -d',' -f2)"
-	account_id="$(cat account.map | grep $account | cut -d',' -f3)"
-	environment="$(cat environment.map | grep $environment | cut -d',' -f1)"
-	environment_fancy="$(cat environment.map | grep $environment | cut -d',' -f2)"
-	environment_description="$(cat environment.map | grep $environment | cut -d',' -f3)"
+	# echo -n " - Refreshing variables... - "
+	if [[ "$account_id" || "$account_description" ]]; then account="$(cat account.map | grep $account | cut -d',' -f1)"; fi
+	if [[ "$account" ]]; then account_description="$(cat account.map | grep $account | cut -d',' -f2)"; fi
+	if [[ "$account" ]]; then account_id="$(cat account.map | grep $account | cut -d',' -f3)"; fi
+	if [[ "$environment_fancy" || "$environment_description" ]]; then environment="$(cat environment.map | grep $environment | cut -d',' -f1)"; fi
+	if [[ "$environment" ]]; then environment_fancy="$(cat environment.map | grep $environment | cut -d',' -f2)"; fi
+	if [[ "$environment" ]]; then environment_description="$(cat environment.map | grep $environment | cut -d',' -f3)"; fi
+
+	if [[ "$fancyname" ]]; then name=$(echo $fancyname | perl -pe 'y/[A-Z]/[a-z]/' | sed 's/[^a-zA-Z0-9]//g'); else echo "Fancy Name (required for magic): "; read fancyname; fi
 }
 
 function sourceFile() {
 	filename=$1
 	if [[ -e "$filename" ]]; then
+		echo "Reading $filename..."
 		source $filename
+		deriveVars
 		return 0;
 	else
 		return 1;
@@ -24,26 +50,37 @@ function sourceFile() {
 
 function checkVar() {
 	deriveVars
-	var=$1
-	#echo $var ${!var}
-	if [[ ${!var} == "" ]]; then
-		echo "Enter value: "; read ${var}
-	elif [[ -e "${var}.map" ]]; then
-		while ! grep ${!var} ${var}.map >/dev/null; do
-			echo "Option '${!var}' is invalid. Possible valid options are: "
-			cat ${var}.map
-			echo -n "Enter new value: "; read ${var}
-			deriveVars
+	varchk=$1
+	#echo F $fancyname f $var
+	#echo v $varchk V ${!varchk}
+	while [[ x${!varchk} == "x" ]]; do
+		echo -n "Enter value for ${varchk}: "; read ${varchk}
+	done
+	if [[ x${!varchk} == 'xnull' ]]; then
+		echo "Setting variable to blank!"
+		unset ${varchk}
+	fi
+	# Shake it once, that's fine. Shake it twice, that's okay. Shake it 3 times...
+	deriveVars;deriveVars
+
+	if [[ -e "${varchk}.map" ]]; then
+		while ! grep ${!varchk} ${varchk}.map >/dev/null; do
+			echo "Option '${!varchk}' is invalid. Possible valid options are: "
+			cat ${varchk}.map
+			echo -n "Enter new value: "; read ${varchk}
+			# Shake it once, that's fine. Shake it twice, that's okay. Shake it 3 times...
+			deriveVars;deriveVars
 		done
 	fi
-	echo "${!var}"
+	if [[ $optionsFile ]]; then echo "$varchk=\"${!varchk}\"" | tee -a $optionsFile
+	else echo "\"${!varchk}\""; fi
 }
 
-while getopts "n:d:e:l:a:h" opt; do
+while getopts "n:d:e:l:a:hvo:r:p:" opt; do
   case $opt in
 		n)
 			echo "fancy name: $OPTARG" >&2
-			fname=$OPTARG
+			fancyname=$OPTARG
       ;;
 		d)
 			echo "description: $OPTARG" >&2
@@ -61,6 +98,18 @@ while getopts "n:d:e:l:a:h" opt; do
 			echo "account: $OPTARG" >&2
 			account=$OPTARG
     ;;
+		o)
+			echo "Write options to: $OPTARG" >&2
+			optionsFile=$OPTARG; echo -n ''> $optionsFile || errCatch $?
+    ;;
+		p)
+			echo "Policy file: $OPTARG" >&2
+			policyFile=$OPTARG
+    ;;
+		r)
+			echo "Read options from: $OPTARG" >&2
+			sourceFile=$OPTARG; source $sourceFile || errCatch $?
+    ;;
 		h)
 			echo "-n fancyname -d description -e environment -l layer -a account";
 			exit 0
@@ -77,31 +126,46 @@ while getopts "n:d:e:l:a:h" opt; do
 done
 
 echo ""
-#exit 0
 
 # futurey sourcey cleanupy stuffs
-sourceFile "config.defaults" || echo "Defaults file config.defaults is NOT found. "#default variables on a per-creator basis
-sourceFile "core.defaults" || echo "Defaults file config.defaults is NOT found. "#default variables on a per-creator basis
+sourceFile "config.defaults" || echo "Defaults file config.defaults was NOT found. "#default variables on a per-creator basis
+sourceFile "core.defaults" || echo "core file core.defaults was NOT found. "#default variables on a per-creator basis
 
 # set variables. we're down to 5 inputs required at runtime. yaa!
 #fname=$1
-#name = $(echo $fname | sed 's/'s/\(.*\)/\L\1/'| sed 's/[^a-zA-Z0-9]//g'); fi
+#name = $(echo $fancyname | sed 's/'s/\(.*\)/\L\1/'| sed 's/[^a-zA-Z0-9]//g'); fi
+if [[ $sourceFile ]]; then sourceFile $sourceFile; fi
+
+if [[ ! $fancyname ]]; then echo "Fancy Name (required for magic): "; read fancyname; fi
+
 if [[ ! $name ]]; then
-	name=$(echo $fname | perl -pe 'y/[A-Z]/[a-z]/' | sed 's/[^a-zA-Z0-9]//g')
+	name=$(echo $fancyname | perl -pe 'y/[A-Z]/[a-z]/' | sed 's/[^a-zA-Z0-9]//g')
 fi
-sourceFile "${name}.project" || echo "Project file for $name not found." #file full of everything needed to spin up anything ever that isn't included in the defaults
+sourceFile "${name}.options" || echo "Options file for $name not found." #file full of everything needed to spin up anything ever that isn't included in the defaults
+
+if [[ $sourceFile ]]; then sourceFile $sourceFile; fi
 
 # auto-determined values (there's no such thing as MAGIC)
 # do a little logic (break a sweat with that elbow grease)
 deriveVars
 
-# reset the spanish inquisition state
+# prepare git
+cd $rootDir/atlas || exit 1
+if ! git branch -l | grep "feature/$name"; then
+	git branch "feature/$name" &&	git checkout "feature/$name"
+else
+	git checkout "feature/$name" && git branch --set-upstream-to=origin/feature/$name feature/$name && git pull
+fi
+cd $rootDir
+
+#exit 0
+
+# reset the query vars. too static, changing later
 ask_instances='0'
 ask_asg='0'
 ask_storage='0'
 ask_ports='0'
 ask_modules='0'
-
 
 # purely static variables-ish
 # soon to be 'atlas_defaults' and then if REQUIRED you can EASILY tack on any other module
@@ -118,7 +182,7 @@ function checkModule() {
 		ask_modules='0'
 	else
 		echo "Module "$module" not found!"
-		ask_modules='1'
+		module=''
 	fi
 }
 # if remote state isn't defined then use the atlas remote state - in future you can specify multiple remote states,
@@ -127,22 +191,26 @@ function checkModule() {
 # make echo not return a newline automatically
 alias echo='echo -e -n'
 
+if [[ $sourceFile ]]; then sourceFile $sourceFile; fi
+deriveVars
+
 echo "\n"
 echo "---Variables---\n"
-echo " Fancy name: "; checkVar fname
-echo " Short name: "; checkVar name
-echo " Description: "; checkVar description
-echo " Type: "; checkVar type
-echo " Team: "; checkVar team
-echo " Owner: "; checkVar owner
-echo " Environment: "; checkVar environment
-echo " Remote state: "; checkVar remotestate
-echo " Account: "; checkVar account
-echo " Account Description: "; checkVar account_description
-echo " Account ID: "; checkVar account_id
-echo " Module: "; checkVar module
+
+IFS=$(echo -en "\n\b")
+alias csv="cut -d','"
+for line in $(cat ${rootDir}/variables); do
+	template=$(echo $line | csv -f1)
+	var=$(echo $line | csv -f2 | sed 's/^\$//g')
+	fancyvar=$(echo $line | csv -f3)
+	echo -n " $fancyvar: "; checkVar $var
+done
+IFS=$oldIFS
+
 echo "---End of Variables---\n"
 echo "\n"
+
+echo -n "Press ENTER to generate or CTRL+C to stop"; read
 
 # reset echo
 alias echo=echo
@@ -153,7 +221,7 @@ alias echo=echo
 
 # prepare directory structure
 rootDir=$(pwd)
-cd ~/vfd/atlas
+cd $rootDir/atlas
 if [[ "x$environment" == "xhub" ]]; then
 	newdir="hubs/hub1/$type/$name"
 else
@@ -164,31 +232,27 @@ echo "Resource destination location: "$newdir
 mkdir -p $newdir || exit 1
 cd $newdir || exit 1
 echo "Cleaning directory..."
-rm * 2>/dev/null
-cp -r ~/vfd/resource/* .
+#echo rm * #2>/dev/null
+#ls $rootDir/template/base/*
+cp -r $rootDir/template/base/* .
+if [[ $policyFile ]]; then cp $policyFile $name.json; fi
+if [[ ! -e $name.json ]]; then mv default.json $name.json; fi
 pwd
+#exit
 
 echo "Generating tf files..."
-alias sed="sed -i"
+alias sed="sed"
 IFS=$(echo -en "\n\b")
 for file in $(ls -1); do
-	sed -i "s/\$_FANCY_NAME/$fname/g" $file
-	sed -i "s/\$_NAME/$name/g" $file
-	sed -i "s/\$_TYPE/$type/g" $file
-	sed -i "s/\$_OWNER/$owner/g" $file
-	sed -i "s/\$_TEAM/$team/g" $file
-	sed -i "s/\$_DESCRIPTION/$description/g" $file
-	sed -i "s/\$_ENVIRONMENT/$environment/g" $file
-	sed -i "s/\$_ENVIRONMENT_FANCY/$environment_fancy/g" $file
-	sed -i "s/\$_ENVIRONMENT_DESCRIPTION/$environment_description/g" $file
-	sed -i "s/\$_REMOTE_STATE/$remotestate/g" $file
-	sed -i "s/\$_ACCOUNT_NAME/$account/g" $file
-	sed -i "s/\$_ACCOUNT_DESCRIPTION/$account_description/g" $file
-	sed -i "s/\$_ACCOUNT_ID/$account_id/g" $file
-	sed -i "s/\$_MODULE/$module/g" $file
-	#sed -i "s/\$_//g' $file
+	for line in $(cat ${rootDir}/variables); do
+		template=$(echo $line | csv -f1)
+		var=$(echo $line | csv -f2 | sed 's/^\$//g')
+		fancyvar=$(echo $line | csv -f3)
+		#echo v $var V ${!var}
+		sed -i "s/$template/${!var}/g" $file
+	done
 done
-
+IFS=$oldIFS
 alias sed='sed'
 
 # start getting nosey with the chat questions
@@ -209,8 +273,49 @@ alias sed='sed'
 	# if it's not using storage then why include anything to do with s3?
 	# bucket generation determines things like read/write/access
 
+PATH=$PATH:/bin:/usr/bin
+
 echo "Generation complete!"
+IFS=$oldIFS
 echo "Running plan..."
+cd $rootDir/atlas
+
+$(aws-env $account)
+
+i=0
+exec 3>&1
+while echo $(vagrant ssh -c "make -C /vagrant/$newdir plan | tee /vagrant/plan.output" 2>&1 1>&3) | grep 'vagrant up' > /dev/null
+do
+	i=$((i+1))
+	vagrant up || errCatch $?
+	if [[ $i > "3" ]]; then echo "3 attempts to launch this jalopy failed. Aborting..."; exit 1; fi
+done
+exec 3>&-
+
+#err=$?
+#echo "Plan has run. It returned $err"
+
+alias grep="grep --colour=never"
+
 cd $rootDir
-aws-env $account && vagrant ssh -c "make -C $newdir plan > plan.output"
-echo "Plan has run. It was a "
+
+if grep  "error(s) occurred" atlas/plan.output; then
+	grep "^\*" atlas/plan.output
+	exit $err
+fi
+
+echo -n '```' > $name.plan; cat atlas/plan.output | awk '/------------/{flag=1;next}/----------------------/{flag=0}flag' >> $name.plan; echo '```' >> $name.plan
+
+cd atlas || exit 1
+git add $newdir || exit 1
+git status; echo -n "It looks like everything went well. Press enter to commit or CTRL+C to exit."; read
+git commit || errCatch $?
+
+# FIX THIS!!!!!
+while [[ x$(echo -n "Would you like to rebase? [Y/n]:"; read rebase) != "xY" || "xn" || "x" ]]; do echo "$rebase is an invalid response!";done
+if [[ x$rebase == 'xY' || 'x' ]]; then echo git rebase -i; fi
+
+
+git push origin feature/$name
+
+echo "The plan results can be seen in $name.plan"

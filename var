@@ -1,0 +1,14 @@
+$_FANCY_NAME,$fancyname,fancy name
+$_NAME,$name,name
+$_TYPE,$type,type
+$_OWNER,$owner,owner
+$_TEAM,$team,team
+$_DESCRIPTION,$description,description
+$_ENVIRONMENT,$environment,environment
+$_ENVIRONMENT_FANCY,$environmentfancy,environment fancy
+$_ENVIRONMENT_DESCRIPTION,$environmentdescription,environment description
+$_REMOTE_STATE,$remotestate,remote state
+$_ACCOUNT_NAME,$accountname,account name
+$_ACCOUNT_DESCRIPTION,$accountdescription,account description
+$_ACCOUNT_ID,$accountid,account id
+$_MODULE,$module,module

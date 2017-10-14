@@ -1,0 +1,5 @@
+# Atlas $_ENVIRONMENT
+
+## $_FANCY_NAME
+
+$_DESCRIPTION

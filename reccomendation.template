@@ -1,0 +1,14 @@
+$_FANCY_NAME="Recommendation Resources"
+$_NAME="recommendation"
+$_TYPE="resources"
+$_OWNER=isre
+$_TEAM="ISRE Team"
+$_DESCRIPTION="Recommendation resources"
+$_ENVIRONMENT=prod
+$_ENVIRONMENT_FANCY="Production"
+$_ENVIRONMENT_DESCRIPTION="Atlas Production Environment"
+$_REMOTE_STATE=atlas
+$_ACCOUNT_NAME=prod-3.0
+$_ACCOUNT_DESCRIPTION=Production
+$_ACCOUNT_ID="058144102190"
+$_MODULE=atlas_static_service

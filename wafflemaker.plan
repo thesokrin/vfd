@@ -1,0 +1,80 @@
+```
+An execution plan has been generated and is shown below.
+Resource actions are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
++ module.atlas_static_service.aws_iam_instance_profile.default
+      id:                                    <computed>
+      arn:                                   <computed>
+      create_date:                           <computed>
+      name:                                  "atlas_dev_wafflemaker_profile"
+      path:                                  "/"
+      role:                                  "none"
+      roles.#:                               <computed>
+      unique_id:                             <computed>
+
+  + module.atlas_static_service.aws_security_group.default
+      id:                                    <computed>
+      description:                           "Security group for Static Services (wafflemaker) instances in the Atlas Development Environment."
+      egress.#:                              "1"
+      egress.482069346.cidr_blocks.#:        "1"
+      egress.482069346.cidr_blocks.0:        "0.0.0.0/0"
+      egress.482069346.from_port:            "0"
+      egress.482069346.ipv6_cidr_blocks.#:   "0"
+      egress.482069346.prefix_list_ids.#:    "0"
+      egress.482069346.protocol:             "-1"
+      egress.482069346.security_groups.#:    "0"
+      egress.482069346.self:                 "false"
+      egress.482069346.to_port:              "0"
+      ingress.#:                             "2"
+      ingress.1633602831.cidr_blocks.#:      "12"
+      ingress.1633602831.cidr_blocks.0:      "10.50.20.0/23"
+      ingress.1633602831.cidr_blocks.1:      "10.50.22.0/23"
+      ingress.1633602831.cidr_blocks.10:     "10.10.12.0/23"
+      ingress.1633602831.cidr_blocks.11:     "10.10.14.0/23"
+      ingress.1633602831.cidr_blocks.2:      "10.50.24.0/23"
+      ingress.1633602831.cidr_blocks.3:      "10.50.30.0/23"
+      ingress.1633602831.cidr_blocks.4:      "10.50.32.0/23"
+      ingress.1633602831.cidr_blocks.5:      "10.50.34.0/23"
+      ingress.1633602831.cidr_blocks.6:      "10.50.10.0/23"
+      ingress.1633602831.cidr_blocks.7:      "10.50.12.0/23"
+      ingress.1633602831.cidr_blocks.8:      "10.50.14.0/23"
+      ingress.1633602831.cidr_blocks.9:      "10.10.10.0/23"
+      ingress.1633602831.from_port:          "80"
+      ingress.1633602831.ipv6_cidr_blocks.#: "0"
+      ingress.1633602831.protocol:           "tcp"
+      ingress.1633602831.security_groups.#:  "0"
+      ingress.1633602831.self:               "false"
+      ingress.1633602831.to_port:            "80"
+      ingress.3295563666.cidr_blocks.#:      "3"
+      ingress.3295563666.cidr_blocks.0:      "10.50.0.0/16"
+      ingress.3295563666.cidr_blocks.1:      "10.10.0.0/16"
+      ingress.3295563666.cidr_blocks.2:      "10.40.0.0/21"
+      ingress.3295563666.from_port:          "22"
+      ingress.3295563666.ipv6_cidr_blocks.#: "0"
+      ingress.3295563666.protocol:           "tcp"
+      ingress.3295563666.security_groups.#:  "0"
+      ingress.3295563666.self:               "false"
+      ingress.3295563666.to_port:            "22"
+      name:                                  "wafflemaker.dev.grindr.io"
+      owner_id:                              <computed>
+      tags.%:                                "6"
+      tags.Name:                             "wafflemaker.dev.grindr.io"
+      tags.atlas_environment:                "development"
+      tags.atlas_layer:                      "services"
+      tags.atlas_project:                    "wafflemaker"
+      tags.atlas_zone:                       "dev.grindr.io"
+      tags.project_owner:                    "ISRE Team"
+      vpc_id:                                "vpc-d3de2bb5"
+Plan: 2 to add, 0 to change, 0 to destroy.
+
+
+This plan was saved to: .terraform/terraform.tfplan
+
+To perform exactly these actions, run the following command to apply:
+    terraform apply ".terraform/terraform.tfplan"
+
+make: Leaving directory `/vagrant/environments/development/resources/wafflemaker'
+```

@@ -1,6 +1,7 @@
-# hardcoded for now cause just cause - will be put in a default source file that should never
-# need to be touched...and probably auto-gen'd using fierce witchcraft
 team="isre"
 owner="ISRE Team"
 module='atlas_static_service'
-remotestate="atlas"
+remote_state="atlas"
+aws_region="us-east-1"
+#ec2_instance_count="1"
+ec2_instance_type="t2.large"
