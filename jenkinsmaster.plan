@@ -11,7 +11,7 @@ Terraform will perform the following actions:
       create_date:                               <computed>
       name:                                      "atlas_hub_jenkinsmaster_profile"
       path:                                      "/"
-      role:                                      <computed>
+      role:                                      "atlas_ec2_assume_role"
       roles.#:                                   <computed>
       unique_id:                                 <computed>
 

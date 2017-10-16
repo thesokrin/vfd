@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# extract terraform vars
+#for file in $(ls -1 template/base); do         cat template/base/${file} | cut -d'"' -f2 | grep -o '\${[a-z\._0-9}]*' | sort -u ; done
+
 echo -n "" > variables.base
 for file in $(ls -1 template/base)
 do

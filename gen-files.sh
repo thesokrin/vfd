@@ -111,7 +111,7 @@ while getopts "n:d:e:l:a:hvo:r:p:" opt; do
 			sourceFile=$OPTARG; source $sourceFile || errCatch $?
     ;;
 		h)
-			echo "-n fancyname -d description -e environment -l layer -a account";
+			echo "-n fancyname -d description -e environment -l layer -a account -o optionsfile -r read from this options file";
 			exit 0
     ;;
     \?)
@@ -160,16 +160,6 @@ cd $rootDir
 
 #exit 0
 
-# reset the query vars. too static, changing later
-ask_instances='0'
-ask_asg='0'
-ask_storage='0'
-ask_ports='0'
-ask_modules='0'
-
-# purely static variables-ish
-# soon to be 'atlas_defaults' and then if REQUIRED you can EASILY tack on any other module
-
 # make it so it will auto-gen the resources files around the module-required definitions auto-gen'd from grepping/sed'ing the module
 # files. possibly future, interactive-repair during checks. no need to edit,save,plan... . just edit, plan, improvise, done
 # check if module exists. if it doesn't then make directory structure and prepare to ask moduley questions
@@ -199,7 +189,7 @@ echo "---Variables---\n"
 
 IFS=$(echo -en "\n\b")
 alias csv="cut -d','"
-for line in $(cat ${rootDir}/variables); do
+for line in $(cat ${rootDir}/variables.base); do
 	template=$(echo $line | csv -f1)
 	var=$(echo $line | csv -f2 | sed 's/^\$//g')
 	fancyvar=$(echo $line | csv -f3)
@@ -220,6 +210,7 @@ alias echo=echo
 #exit 0
 
 # prepare directory structure
+./getvars
 rootDir=$(pwd)
 cd $rootDir/atlas
 if [[ "x$environment" == "xhub" ]]; then
@@ -232,11 +223,11 @@ echo "Resource destination location: "$newdir
 mkdir -p $newdir || exit 1
 cd $newdir || exit 1
 echo "Cleaning directory..."
-#echo rm * #2>/dev/null
+rm "*" > /dev/null
 #ls $rootDir/template/base/*
 cp -r $rootDir/template/base/* .
-if [[ $policyFile ]]; then cp $policyFile $name.json; fi
-if [[ ! -e $name.json ]]; then mv default.json $name.json; fi
+# if [[ $policyFile ]]; then cp $policyFile $name.json; fi
+# if [[ ! -e $name.json ]]; then mv default.json $name.json; fi
 pwd
 #exit
 
@@ -251,6 +242,7 @@ for file in $(ls -1); do
 		#echo v $var V ${!var}
 		sed -i "s/$template/${!var}/g" $file
 	done
+	#sed -i -e '/^[ \t]*#/d' ${file}
 done
 IFS=$oldIFS
 alias sed='sed'
@@ -312,9 +304,12 @@ git status; echo -n "It looks like everything went well. Press enter to commit o
 git commit || errCatch $?
 
 # FIX THIS!!!!!
-while [[ x$(echo -n "Would you like to rebase? [Y/n]:"; read rebase) != "xY" || "xn" || "x" ]]; do echo "$rebase is an invalid response!";done
+echo -n "Would you like to rebase? [Y/n]: "
+while [[ x$(read rebase) != "xY" || "xn" || "x" ]]; do echo "$rebase is an invalid response!";done
 if [[ x$rebase == 'xY' || 'x' ]]; then echo git rebase -i; fi
-
+else
+	echo "Skipping rebase!"
+fi
 
 git push origin feature/$name
 

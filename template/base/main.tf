@@ -13,19 +13,4 @@ module "$_MODULE" {
 
   name               = "$_NAME"
   project_name       = "${var.project_name}"
-  project_owner      = "${var.project_owner}"
-
-  ec2_instance_count = "${var.ec2_instance_count}"
-  ec2_instance_type  = "${var.ec2_instance_type}"
-  ec2_iam_role       = "${var.ec2_iam_role}"
-
-  #vpc                = "${var.vpc}"
-  #subnet             = "${var.subnet}"
-  #cidr               = ["${var.cidr}"]
 }
-
-#resource "aws_iam_policy" "policy" {
-#  name        = "$_NAME"
-#  description = "Policy for $_FANCY_NAME"
-#  policy      = "${file("$_NAME.json")}"
-#}
