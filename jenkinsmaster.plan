@@ -24,7 +24,7 @@ Terraform will perform the following actions:
       ephemeral_block_device.#:                  <computed>
       iam_instance_profile:                      "atlas_hub_jenkinsmaster_profile"
       instance_state:                            <computed>
-      instance_type:                             "c4.large"
+      instance_type:                             "m4.large"
       ipv6_address_count:                        <computed>
       ipv6_addresses.#:                          <computed>
       key_name:                                  "isre-shared"

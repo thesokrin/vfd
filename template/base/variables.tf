@@ -12,10 +12,18 @@ variable "atlas_environment" {
 }
 
 variable "ec2_iam_role" {
-  default = "atlas_ec2_assume_role"
+  default = ""
 
   description = <<-EOF
     An IAM role object to attach to the IAM instance profile of the static_service host.
+  EOF
+}
+
+variable "module" {
+  default = "atlas_static_module"
+
+  description = <<-EOF
+    Static Module for Atlas Resources
   EOF
 }
 

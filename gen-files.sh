@@ -183,6 +183,7 @@ alias echo='echo -e -n'
 
 if [[ $sourceFile ]]; then sourceFile $sourceFile; fi
 deriveVars
+./getvars > /dev/null
 
 echo "\n"
 echo "---Variables---\n"
@@ -199,18 +200,14 @@ IFS=$oldIFS
 
 echo "---End of Variables---\n"
 echo "\n"
-
 echo -n "Press ENTER to generate or CTRL+C to stop"; read
 
 # reset echo
 alias echo=echo
 
 # populate the basic templates (eventually source a global variables.tf file instead of things flying willy-nilly)
-## woah there, exiting now cause debug!!
-#exit 0
 
 # prepare directory structure
-./getvars
 rootDir=$(pwd)
 cd $rootDir/atlas
 if [[ "x$environment" == "xhub" ]]; then
@@ -223,7 +220,7 @@ echo "Resource destination location: "$newdir
 mkdir -p $newdir || exit 1
 cd $newdir || exit 1
 echo "Cleaning directory..."
-rm "*" > /dev/null
+rm * > /dev/null
 #ls $rootDir/template/base/*
 cp -r $rootDir/template/base/* .
 # if [[ $policyFile ]]; then cp $policyFile $name.json; fi
@@ -305,7 +302,7 @@ git commit || errCatch $?
 
 # FIX THIS!!!!!
 echo -n "Would you like to rebase? [Y/n]: "
-while [[ x$(read rebase) != "xY" || "xn" || "x" ]]; do echo "$rebase is an invalid response!";done
+while [[ x$(read rebase; echo $rebase) != "xY" || "xn" || "x" ]]; do echo "$rebase is an invalid response!";done
 if [[ x$rebase == 'xY' || 'x' ]]; then echo git rebase -i; fi
 else
 	echo "Skipping rebase!"

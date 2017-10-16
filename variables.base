@@ -10,4 +10,5 @@ $_ENVIRONMENT_FANCY,$environment_fancy,environment fancy
 $_FANCY_NAME,$fancyname,fancy name
 $_MODULE,$module,module
 $_NAME,$name,name
+$_PROJECT_OWNER,$project_owner,project owner
 $_TYPE,$type,type

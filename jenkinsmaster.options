@@ -1,6 +1,17 @@
 ec2_instance_type="m4.large"
 description="Jenkins CD Master Resource"
 environment=hub
+environment_description="Atlas Hub Environment"
+environment_fancy="hub"
 layer=admin
 account=Legacy
 ec2_instance_count=1
+account_id="284224159432"
+account="prod-2.0"
+aws_region="us-east-1"
+ec2_iam_role="atlas_ec2_assume_role"
+fancyname="Jenkins Master"
+module="atlas_static_service"
+name="jenkinsmaster"
+owner="ISRE Team"
+type="resources"

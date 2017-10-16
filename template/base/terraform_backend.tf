@@ -1,4 +1,4 @@
-# Terraform Backend File - Managed by Automation
+# Terraform Backend File - Managed by Automagic
 
 terraform {
   backend "s3" {

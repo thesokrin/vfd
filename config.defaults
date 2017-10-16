@@ -1,5 +1,6 @@
 team="isre"
 owner="ISRE Team"
+project_owner="ISRE Team"
 module='atlas_static_service'
 remote_state="atlas"
 aws_region="us-east-1"
