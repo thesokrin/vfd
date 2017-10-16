@@ -1,0 +1,24 @@
+#!/bin/bash
+
+echo -n "" > variables.base
+for file in $(ls -1 template/base)
+do
+	cat template/base/${file} | cut -d'"' -f2 | grep -o '\$\_[A-Z,0-9_]*' | sort -u >> variables.base
+done
+
+cat variables.base | sort -u > vars.new && mv vars.new variables.base
+echo -n "" > vars.new
+
+for line in $(cat variables.base)
+do
+	if grep ${line} variables; then
+		grep ${line} variables >> vars.new
+	else
+		vari=$(echo ${line} | tr '[:upper:]' '[:lower:]' | sed 's/$_/$/g')
+		desc=$(echo ${line} | tr '[:upper:]' '[:lower:]' | sed 's/$_//g' | sed 's/_/ /g')
+		echo "Adding: ${line},${vari},${desc}"
+		echo "${line},${vari},${desc}" >> vars.new
+	fi
+done
+mv vars.new variables.base.new
+mv variables.base.new variables.base

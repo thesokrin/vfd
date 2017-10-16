@@ -244,7 +244,7 @@ echo "Generating tf files..."
 alias sed="sed"
 IFS=$(echo -en "\n\b")
 for file in $(ls -1); do
-	for line in $(cat ${rootDir}/variables); do
+	for line in $(cat ${rootDir}/variables.base); do
 		template=$(echo $line | csv -f1)
 		var=$(echo $line | csv -f2 | sed 's/^\$//g')
 		fancyvar=$(echo $line | csv -f3)
