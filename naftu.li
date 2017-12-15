@@ -1,0 +1,12 @@
+#!/bin/bash
+
+cd atlas
+pwd
+
+# detect which modules changed if any
+for module in $(git diff --name-only HEAD~1 | grep -P '^modules') ; do echo $module ; done
+
+# find all projects for all modules changed: [12:01]
+for module in $(git diff --name-only HEAD~1 | grep -P '^modules' | awk -F / '{print $2;}') ; do grep -R "modules/$module" environments hubs ; done
+
+# you can update the bin/atlas-project-validate script to test the modules
